@@ -17,9 +17,9 @@ contract TreasuryVault is Ownable {
     error NotPlatform();
     error ZeroAddress();
 
-    constructor(address admin_) Ownable(admin_) {
-        if (admin_ == address(0)) revert ZeroAddress();
-        admin = admin_;
+    constructor(address _admin) Ownable(_admin) {
+        if (_admin == address(0)) revert ZeroAddress();
+        admin = _admin;
     }
 
     modifier onlyPlatform() {
@@ -27,19 +27,19 @@ contract TreasuryVault is Ownable {
         _;
     }
 
-    function setPlatform(address platform_) external onlyOwner {
-        if (platform_ == address(0)) revert ZeroAddress();
-        platform = platform_;
-        emit PlatformUpdated(platform_);
+    function setPlatform(address _platform) external onlyOwner {
+        if (_platform == address(0)) revert ZeroAddress();
+        platform = _platform;
+        emit PlatformUpdated(_platform);
     }
 
-    function recordTicketSale(uint256 eventId, uint256 amountInCredits) external onlyPlatform {
-        paidCreditsByEvent[eventId] += amountInCredits;
-        emit TicketSaleRecorded(eventId, amountInCredits);
+    function recordTicketSale(uint256 _eventId, uint256 _amountInCredits) external onlyPlatform {
+        paidCreditsByEvent[_eventId] += _amountInCredits;
+        emit TicketSaleRecorded(_eventId, _amountInCredits);
     }
 
-    function recordRefund(uint256 eventId, uint256 amountInCredits) external onlyPlatform {
-        refundCreditsByEvent[eventId] += amountInCredits;
-        emit RefundRecorded(eventId, amountInCredits);
+    function recordRefund(uint256 _eventId, uint256 _amountInCredits) external onlyPlatform {
+        refundCreditsByEvent[_eventId] += _amountInCredits;
+        emit RefundRecorded(_eventId, _amountInCredits);
     }
 }

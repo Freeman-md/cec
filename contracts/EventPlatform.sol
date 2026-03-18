@@ -32,6 +32,8 @@ contract EventPlatform is Ownable {
         uint256 soldCount;
     }
 
+    uint256 public constant DEFAULT_WALLET_CAP = 1;
+
     address public immutable admin;
     CreditsToken public immutable creditsToken;
     TicketNFT public immutable ticketNFT;
@@ -80,22 +82,23 @@ contract EventPlatform is Ownable {
     error ZeroAddress();
 
     constructor(
-        address admin_,
-        address creditsToken_,
-        address ticketNFT_,
-        address treasuryVault_,
-        uint256 initialEthToCreditsRate
-    ) Ownable(admin_) {
+        address _admin,
+        address _creditsToken,
+        address _ticketNFT,
+        address _treasuryVault,
+        uint256 _initialEthToCreditsRate
+    ) Ownable(_admin) {
         if (
-            admin_ == address(0) || creditsToken_ == address(0) || ticketNFT_ == address(0) || treasuryVault_ == address(0)
+            _admin == address(0) || _creditsToken == address(0) || _ticketNFT == address(0)
+                || _treasuryVault == address(0)
         ) revert ZeroAddress();
-        if (initialEthToCreditsRate == 0) revert InvalidRate();
+        if (_initialEthToCreditsRate == 0) revert InvalidRate();
 
-        admin = admin_;
-        creditsToken = CreditsToken(creditsToken_);
-        ticketNFT = TicketNFT(ticketNFT_);
-        treasuryVault = TreasuryVault(treasuryVault_);
-        ethToCreditsRate = initialEthToCreditsRate;
+        admin = _admin;
+        creditsToken = CreditsToken(_creditsToken);
+        ticketNFT = TicketNFT(_ticketNFT);
+        treasuryVault = TreasuryVault(_treasuryVault);
+        ethToCreditsRate = _initialEthToCreditsRate;
     }
 
     modifier onlyApprovedOrganizer() {
@@ -103,24 +106,24 @@ contract EventPlatform is Ownable {
         _;
     }
 
-    modifier onlyEventOrganizer(uint256 eventId) {
-        if (events[eventId].organizer != msg.sender) revert NotEventOrganizer();
+    modifier onlyEventOrganizer(uint256 _eventId) {
+        if (events[_eventId].organizer != msg.sender) revert NotEventOrganizer();
         _;
     }
 
-    function approveOrganizer(address organizer, bool approved) external onlyOwner {
-        if (organizer == address(0)) revert ZeroAddress();
-        approvedOrganizers[organizer] = approved;
-        emit OrganizerApprovalUpdated(organizer, approved);
+    function approveOrganizer(address _organizer, bool _approved) external onlyOwner {
+        if (_organizer == address(0)) revert ZeroAddress();
+        approvedOrganizers[_organizer] = _approved;
+        emit OrganizerApprovalUpdated(_organizer, _approved);
     }
 
-    function updateEthToCreditsRate(uint256 newRate) external onlyOwner {
-        if (newRate == 0) revert InvalidRate();
+    function updateEthToCreditsRate(uint256 _newRate) external onlyOwner {
+        if (_newRate == 0) revert InvalidRate();
 
         uint256 oldRate = ethToCreditsRate;
-        ethToCreditsRate = newRate;
+        ethToCreditsRate = _newRate;
 
-        emit EthToCreditsRateUpdated(oldRate, newRate);
+        emit EthToCreditsRateUpdated(oldRate, _newRate);
     }
 
     function createEvent() external onlyApprovedOrganizer returns (uint256 eventId) {
@@ -129,7 +132,7 @@ contract EventPlatform is Ownable {
             eventId: eventId,
             organizer: msg.sender,
             state: EventState.Draft,
-            walletCap: 1,
+            walletCap: DEFAULT_WALLET_CAP,
             payoutReleased: false
         });
 
@@ -137,42 +140,42 @@ contract EventPlatform is Ownable {
     }
 
     function createTicketTier(
-        uint256 eventId,
-        string calldata label,
-        uint256 priceInCredits,
-        uint256 maxSupply
-    ) external onlyEventOrganizer(eventId) returns (uint256 tierId) {
-        if (events[eventId].state != EventState.Draft) revert InvalidEventState();
-        if (bytes(label).length == 0 || priceInCredits == 0 || maxSupply == 0) revert InvalidTierConfiguration();
+        uint256 _eventId,
+        string calldata _label,
+        uint256 _priceInCredits,
+        uint256 _maxSupply
+    ) external onlyEventOrganizer(_eventId) returns (uint256 tierId) {
+        if (events[_eventId].state != EventState.Draft) revert InvalidEventState();
+        if (bytes(_label).length == 0 || _priceInCredits == 0 || _maxSupply == 0) revert InvalidTierConfiguration();
 
-        tierId = ++nextTierIdByEvent[eventId];
-        ticketTiers[eventId][tierId] = TicketTier({
+        tierId = ++nextTierIdByEvent[_eventId];
+        ticketTiers[_eventId][tierId] = TicketTier({
             tierId: tierId,
-            eventId: eventId,
-            label: label,
-            priceInCredits: priceInCredits,
-            maxSupply: maxSupply,
+            eventId: _eventId,
+            label: _label,
+            priceInCredits: _priceInCredits,
+            maxSupply: _maxSupply,
             soldCount: 0
         });
 
-        emit TicketTierCreated(eventId, tierId, label, priceInCredits, maxSupply);
+        emit TicketTierCreated(_eventId, tierId, _label, _priceInCredits, _maxSupply);
     }
 
-    function setPerEventWalletCap(uint256 eventId, uint256 walletCap) external onlyEventOrganizer(eventId) {
-        if (events[eventId].state != EventState.Draft) revert InvalidEventState();
-        if (walletCap == 0) revert InvalidWalletCap();
+    function setPerEventWalletCap(uint256 _eventId, uint256 _walletCap) external onlyEventOrganizer(_eventId) {
+        if (events[_eventId].state != EventState.Draft) revert InvalidEventState();
+        if (_walletCap == 0) revert InvalidWalletCap();
 
-        events[eventId].walletCap = walletCap;
+        events[_eventId].walletCap = _walletCap;
 
-        emit WalletCapUpdated(eventId, walletCap);
+        emit WalletCapUpdated(_eventId, _walletCap);
     }
 
-    function startTicketSales(uint256 eventId) external onlyEventOrganizer(eventId) {
-        if (events[eventId].state != EventState.Draft) revert InvalidEventState();
+    function startTicketSales(uint256 _eventId) external onlyEventOrganizer(_eventId) {
+        if (events[_eventId].state != EventState.Draft) revert InvalidEventState();
 
-        events[eventId].state = EventState.OnSale;
+        events[_eventId].state = EventState.OnSale;
 
-        emit TicketSalesStarted(eventId);
+        emit TicketSalesStarted(_eventId);
     }
 
     function buyCreditsWithEth() external payable {
@@ -184,26 +187,26 @@ contract EventPlatform is Ownable {
         emit CreditsPurchased(msg.sender, msg.value, creditsToMint);
     }
 
-    function obtainTicketWithCredits(uint256 eventId, uint256 tierId) external returns (uint256 ticketId) {
-        EventData storage eventData = events[eventId];
+    function obtainTicketWithCredits(uint256 _eventId, uint256 _tierId) external returns (uint256 ticketId) {
+        EventData storage eventData = events[_eventId];
         if (eventData.state != EventState.OnSale) revert InvalidEventState();
 
-        TicketTier storage tier = ticketTiers[eventId][tierId];
+        TicketTier storage tier = ticketTiers[_eventId][_tierId];
         if (tier.maxSupply == 0) revert UnknownTier();
-        if (walletPurchases[eventId][msg.sender] >= eventData.walletCap) revert WalletCapExceeded();
+        if (walletPurchases[_eventId][msg.sender] >= eventData.walletCap) revert WalletCapExceeded();
         if (tier.soldCount >= tier.maxSupply) revert TierSoldOut();
 
         creditsToken.transferFrom(msg.sender, address(treasuryVault), tier.priceInCredits);
-        treasuryVault.recordTicketSale(eventId, tier.priceInCredits);
+        treasuryVault.recordTicketSale(_eventId, tier.priceInCredits);
 
-        ticketId = ticketNFT.mint(msg.sender, eventId, tierId);
+        ticketId = ticketNFT.mint(msg.sender, _eventId, _tierId);
         tier.soldCount += 1;
-        walletPurchases[eventId][msg.sender] += 1;
+        walletPurchases[_eventId][msg.sender] += 1;
 
         if (tier.soldCount == tier.maxSupply) {
             eventData.state = EventState.SoldOut;
         }
 
-        emit TicketObtained(eventId, tierId, ticketId, msg.sender, tier.priceInCredits);
+        emit TicketObtained(_eventId, _tierId, ticketId, msg.sender, tier.priceInCredits);
     }
 }

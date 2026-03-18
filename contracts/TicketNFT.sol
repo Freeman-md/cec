@@ -12,9 +12,11 @@ contract TicketNFT is ERC721, Ownable {
         Used
     }
 
+    uint256 public constant INITIAL_TICKET_ID = 1;
+
     address public immutable admin;
     address public platform;
-    uint256 public nextTicketId = 1;
+    uint256 public nextTicketId = INITIAL_TICKET_ID;
 
     mapping(uint256 => TicketState) public ticketStates;
     mapping(uint256 => uint256) public ticketEventIds;
@@ -31,9 +33,9 @@ contract TicketNFT is ERC721, Ownable {
     error InvalidTicketState();
     error NonTransferable();
 
-    constructor(address admin_) ERC721("Campus Event Ticket", "CET") Ownable(admin_) {
-        if (admin_ == address(0)) revert ZeroAddress();
-        admin = admin_;
+    constructor(address _admin) ERC721("Campus Event Ticket", "CET") Ownable(_admin) {
+        if (_admin == address(0)) revert ZeroAddress();
+        admin = _admin;
     }
 
     modifier onlyPlatform() {
@@ -41,55 +43,59 @@ contract TicketNFT is ERC721, Ownable {
         _;
     }
 
-    function setPlatform(address platform_) external onlyOwner {
-        if (platform_ == address(0)) revert ZeroAddress();
-        platform = platform_;
-        emit PlatformUpdated(platform_);
+    function setPlatform(address _platform) external onlyOwner {
+        if (_platform == address(0)) revert ZeroAddress();
+        platform = _platform;
+        emit PlatformUpdated(_platform);
     }
 
-    function mint(address to, uint256 eventId, uint256 tierId) external onlyPlatform returns (uint256 ticketId) {
-        if (to == address(0)) revert ZeroAddress();
+    function mint(address _to, uint256 _eventId, uint256 _tierId) external onlyPlatform returns (uint256 ticketId) {
+        if (_to == address(0)) revert ZeroAddress();
 
         ticketId = nextTicketId++;
-        _safeMint(to, ticketId);
+        _safeMint(_to, ticketId);
         ticketStates[ticketId] = TicketState.Active;
-        ticketEventIds[ticketId] = eventId;
-        ticketTierIds[ticketId] = tierId;
+        ticketEventIds[ticketId] = _eventId;
+        ticketTierIds[ticketId] = _tierId;
 
-        emit TicketMinted(ticketId, to, eventId, tierId);
+        emit TicketMinted(ticketId, _to, _eventId, _tierId);
     }
 
-    function markUsed(uint256 ticketId) external onlyPlatform {
-        if (ticketStates[ticketId] != TicketState.Active) revert InvalidTicketState();
-        ticketStates[ticketId] = TicketState.Used;
-        emit TicketMarkedUsed(ticketId);
+    function markUsed(uint256 _ticketId) external onlyPlatform {
+        if (ticketStates[_ticketId] != TicketState.Active) revert InvalidTicketState();
+        ticketStates[_ticketId] = TicketState.Used;
+        emit TicketMarkedUsed(_ticketId);
     }
 
-    function invalidate(uint256 ticketId) external onlyPlatform {
-        if (ticketStates[ticketId] != TicketState.Active) revert InvalidTicketState();
-        ticketStates[ticketId] = TicketState.Invalidated;
-        emit TicketInvalidated(ticketId);
+    function invalidate(uint256 _ticketId) external onlyPlatform {
+        if (ticketStates[_ticketId] != TicketState.Active) revert InvalidTicketState();
+        ticketStates[_ticketId] = TicketState.Invalidated;
+        emit TicketInvalidated(_ticketId);
     }
 
-    function markRefunded(uint256 ticketId) external onlyPlatform {
-        if (ticketStates[ticketId] != TicketState.Invalidated) revert InvalidTicketState();
-        ticketStates[ticketId] = TicketState.Refunded;
-        emit TicketRefunded(ticketId);
+    function markRefunded(uint256 _ticketId) external onlyPlatform {
+        if (ticketStates[_ticketId] != TicketState.Invalidated) revert InvalidTicketState();
+        ticketStates[_ticketId] = TicketState.Refunded;
+        emit TicketRefunded(_ticketId);
     }
 
-    function approve(address, uint256) public pure override {
+    function approve(address _to, uint256 _ticketId) public pure override {
+        (_to, _ticketId);
         revert NonTransferable();
     }
 
-    function setApprovalForAll(address, bool) public pure override {
+    function setApprovalForAll(address _operator, bool _approved) public pure override {
+        (_operator, _approved);
         revert NonTransferable();
     }
 
-    function transferFrom(address, address, uint256) public pure override {
+    function transferFrom(address _from, address _to, uint256 _ticketId) public pure override {
+        (_from, _to, _ticketId);
         revert NonTransferable();
     }
 
-    function safeTransferFrom(address, address, uint256, bytes memory) public pure override {
+    function safeTransferFrom(address _from, address _to, uint256 _ticketId, bytes memory _data) public pure override {
+        (_from, _to, _ticketId, _data);
         revert NonTransferable();
     }
 }

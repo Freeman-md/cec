@@ -15,9 +15,9 @@ contract CreditsToken is ERC20, Ownable {
     error NotPlatform();
     error ZeroAddress();
 
-    constructor(address admin_) ERC20("Campus Event Credits", "CEC") Ownable(admin_) {
-        if (admin_ == address(0)) revert ZeroAddress();
-        admin = admin_;
+    constructor(address _admin) ERC20("Campus Event Credits", "CEC") Ownable(_admin) {
+        if (_admin == address(0)) revert ZeroAddress();
+        admin = _admin;
     }
 
     modifier onlyPlatform() {
@@ -25,19 +25,19 @@ contract CreditsToken is ERC20, Ownable {
         _;
     }
 
-    function setPlatform(address platform_) external onlyOwner {
-        if (platform_ == address(0)) revert ZeroAddress();
-        platform = platform_;
-        emit PlatformUpdated(platform_);
+    function setPlatform(address _platform) external onlyOwner {
+        if (_platform == address(0)) revert ZeroAddress();
+        platform = _platform;
+        emit PlatformUpdated(_platform);
     }
 
-    function mint(address to, uint256 amount) external onlyPlatform {
-        _mint(to, amount);
-        emit CreditsMinted(to, amount);
+    function mint(address _to, uint256 _amount) external onlyPlatform {
+        _mint(_to, _amount);
+        emit CreditsMinted(_to, _amount);
     }
 
-    function burn(address from, uint256 amount) external onlyPlatform {
-        _burn(from, amount);
-        emit CreditsBurned(from, amount);
+    function burn(address _from, uint256 _amount) external onlyPlatform {
+        _burn(_from, _amount);
+        emit CreditsBurned(_from, _amount);
     }
 }
