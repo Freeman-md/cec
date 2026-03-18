@@ -58,6 +58,14 @@ contract EventPlatform is Ownable {
     );
     event WalletCapUpdated(uint256 indexed eventId, uint256 walletCap);
     event TicketSalesStarted(uint256 indexed eventId);
+    event CreditsPurchased(address indexed buyer, uint256 ethSpent, uint256 creditsMinted);
+    event TicketObtained(
+        uint256 indexed eventId,
+        uint256 indexed tierId,
+        uint256 indexed ticketId,
+        address buyer,
+        uint256 amountInCredits
+    );
 
     error NotApprovedOrganizer();
     error NotEventOrganizer();
@@ -65,6 +73,10 @@ contract EventPlatform is Ownable {
     error InvalidWalletCap();
     error InvalidTierConfiguration();
     error InvalidEventState();
+    error UnknownTier();
+    error WalletCapExceeded();
+    error TierSoldOut();
+    error ZeroValue();
     error ZeroAddress();
 
     constructor(
@@ -161,5 +173,37 @@ contract EventPlatform is Ownable {
         events[eventId].state = EventState.OnSale;
 
         emit TicketSalesStarted(eventId);
+    }
+
+    function buyCreditsWithEth() external payable {
+        if (msg.value == 0) revert ZeroValue();
+
+        uint256 creditsToMint = msg.value * ethToCreditsRate;
+        creditsToken.mint(msg.sender, creditsToMint);
+
+        emit CreditsPurchased(msg.sender, msg.value, creditsToMint);
+    }
+
+    function obtainTicketWithCredits(uint256 eventId, uint256 tierId) external returns (uint256 ticketId) {
+        EventData storage eventData = events[eventId];
+        if (eventData.state != EventState.OnSale) revert InvalidEventState();
+
+        TicketTier storage tier = ticketTiers[eventId][tierId];
+        if (tier.maxSupply == 0) revert UnknownTier();
+        if (walletPurchases[eventId][msg.sender] >= eventData.walletCap) revert WalletCapExceeded();
+        if (tier.soldCount >= tier.maxSupply) revert TierSoldOut();
+
+        creditsToken.transferFrom(msg.sender, address(treasuryVault), tier.priceInCredits);
+        treasuryVault.recordTicketSale(eventId, tier.priceInCredits);
+
+        ticketId = ticketNFT.mint(msg.sender, eventId, tierId);
+        tier.soldCount += 1;
+        walletPurchases[eventId][msg.sender] += 1;
+
+        if (tier.soldCount == tier.maxSupply) {
+            eventData.state = EventState.SoldOut;
+        }
+
+        emit TicketObtained(eventId, tierId, ticketId, msg.sender, tier.priceInCredits);
     }
 }
