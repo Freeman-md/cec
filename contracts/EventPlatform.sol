@@ -49,9 +49,22 @@ contract EventPlatform is Ownable {
     event OrganizerApprovalUpdated(address indexed organizer, bool approved);
     event EthToCreditsRateUpdated(uint256 oldRate, uint256 newRate);
     event EventCreated(uint256 indexed eventId, address indexed organizer);
+    event TicketTierCreated(
+        uint256 indexed eventId,
+        uint256 indexed tierId,
+        string label,
+        uint256 priceInCredits,
+        uint256 maxSupply
+    );
+    event WalletCapUpdated(uint256 indexed eventId, uint256 walletCap);
+    event TicketSalesStarted(uint256 indexed eventId);
 
     error NotApprovedOrganizer();
+    error NotEventOrganizer();
     error InvalidRate();
+    error InvalidWalletCap();
+    error InvalidTierConfiguration();
+    error InvalidEventState();
     error ZeroAddress();
 
     constructor(
@@ -75,6 +88,11 @@ contract EventPlatform is Ownable {
 
     modifier onlyApprovedOrganizer() {
         if (!approvedOrganizers[msg.sender]) revert NotApprovedOrganizer();
+        _;
+    }
+
+    modifier onlyEventOrganizer(uint256 eventId) {
+        if (events[eventId].organizer != msg.sender) revert NotEventOrganizer();
         _;
     }
 
@@ -104,5 +122,44 @@ contract EventPlatform is Ownable {
         });
 
         emit EventCreated(eventId, msg.sender);
+    }
+
+    function createTicketTier(
+        uint256 eventId,
+        string calldata label,
+        uint256 priceInCredits,
+        uint256 maxSupply
+    ) external onlyEventOrganizer(eventId) returns (uint256 tierId) {
+        if (events[eventId].state != EventState.Draft) revert InvalidEventState();
+        if (bytes(label).length == 0 || priceInCredits == 0 || maxSupply == 0) revert InvalidTierConfiguration();
+
+        tierId = ++nextTierIdByEvent[eventId];
+        ticketTiers[eventId][tierId] = TicketTier({
+            tierId: tierId,
+            eventId: eventId,
+            label: label,
+            priceInCredits: priceInCredits,
+            maxSupply: maxSupply,
+            soldCount: 0
+        });
+
+        emit TicketTierCreated(eventId, tierId, label, priceInCredits, maxSupply);
+    }
+
+    function setPerEventWalletCap(uint256 eventId, uint256 walletCap) external onlyEventOrganizer(eventId) {
+        if (events[eventId].state != EventState.Draft) revert InvalidEventState();
+        if (walletCap == 0) revert InvalidWalletCap();
+
+        events[eventId].walletCap = walletCap;
+
+        emit WalletCapUpdated(eventId, walletCap);
+    }
+
+    function startTicketSales(uint256 eventId) external onlyEventOrganizer(eventId) {
+        if (events[eventId].state != EventState.Draft) revert InvalidEventState();
+
+        events[eventId].state = EventState.OnSale;
+
+        emit TicketSalesStarted(eventId);
     }
 }
