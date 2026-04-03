@@ -39,6 +39,7 @@ contract EventPlatform is Ownable {
     TicketNFT public immutable ticketNFT;
     TreasuryVault public immutable treasuryVault;
 
+    // Rate is applied to msg.value (wei) and mints CEC base units.
     uint256 public ethToCreditsRate;
     uint256 public nextEventId = 1;
 
@@ -153,6 +154,7 @@ contract EventPlatform is Ownable {
             tierId: tierId,
             eventId: _eventId,
             label: _label,
+            // CEC price is stored in 18-decimal base units.
             priceInCredits: _priceInCredits,
             maxSupply: _maxSupply,
             soldCount: 0
@@ -181,6 +183,7 @@ contract EventPlatform is Ownable {
     function buyCreditsWithEth() external payable {
         if (msg.value == 0) revert ZeroValue();
 
+        // msg.value arrives in wei, so this mints CEC base units directly.
         uint256 creditsToMint = msg.value * ethToCreditsRate;
         creditsToken.mint(msg.sender, creditsToMint);
 
