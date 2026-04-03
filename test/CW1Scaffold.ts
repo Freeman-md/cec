@@ -54,19 +54,21 @@ describe("CW1 scaffold", function () {
 
   it("lets a student obtain a ticket with credits and records the sale", async function () {
     const { admin, organizer, student, creditsToken, ticketNFT, treasuryVault, eventPlatform } = await deployFixture();
+    const creditsPrice = ethers.parseUnits("200", 18);
+    const ethSpent = ethers.parseEther("2");
 
     await eventPlatform.connect(admin).approveOrganizer(organizer.address, true);
     await eventPlatform.connect(organizer).createEvent();
-    await eventPlatform.connect(organizer).createTicketTier(1n, "Standard", 200n, 2n);
+    await eventPlatform.connect(organizer).createTicketTier(1n, "Standard", creditsPrice, 2n);
     await eventPlatform.connect(organizer).setPerEventWalletCap(1n, 1n);
     await eventPlatform.connect(organizer).startTicketSales(1n);
 
-    await eventPlatform.connect(student).buyCreditsWithEth({ value: 2n });
-    await creditsToken.connect(student).approve(eventPlatform.target, 200n);
+    await eventPlatform.connect(student).buyCreditsWithEth({ value: ethSpent });
+    await creditsToken.connect(student).approve(eventPlatform.target, creditsPrice);
 
     await eventPlatform.connect(student).obtainTicketWithCredits(1n, 1n);
 
-    expect(await treasuryVault.paidCreditsByEvent(1n)).to.equal(200n);
+    expect(await treasuryVault.paidCreditsByEvent(1n)).to.equal(creditsPrice);
     expect(await ticketNFT.ownerOf(1n)).to.equal(student.address);
   });
 });
