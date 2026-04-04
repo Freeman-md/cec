@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import type { AppRole } from "../hooks/usePreviewSession";
+import type { AppRole } from "../types/app";
 
 type RoleGuardProps = {
   allowedRole: AppRole;

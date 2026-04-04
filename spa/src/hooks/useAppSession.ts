@@ -1,0 +1,101 @@
+import { useEffect, useMemo, useState } from "react";
+import { detectRole, getExpectedChainId, getExpectedChainLabel, readCreditsBalance } from "../lib/contracts";
+import { useWallet } from "./useWallet";
+import type { AppRole, SessionIdentity } from "../types/app";
+
+const previewIdentities: Record<AppRole, SessionIdentity> = {
+  student: {
+    account: "0x71C0...4F2",
+    label: "Student",
+  },
+  organizer: {
+    account: "0x0RG4...1Z3",
+    label: "Approved Organizer",
+  },
+  admin: {
+    account: "0xADm1...001",
+    label: "Admin",
+  },
+};
+
+function formatConnectedIdentity(role: AppRole, account: string): SessionIdentity {
+  const roleLabels: Record<AppRole, string> = {
+    student: "Student",
+    organizer: "Approved Organizer",
+    admin: "Admin",
+  };
+
+  return {
+    account: `${account.slice(0, 6)}...${account.slice(-4)}`,
+    label: roleLabels[role],
+  };
+}
+
+export function useAppSession() {
+  const wallet = useWallet();
+  const [previewRole, setPreviewRole] = useState<AppRole>("student");
+  const [detectedRole, setDetectedRole] = useState<AppRole>("student");
+  const [creditsBalance, setCreditsBalance] = useState("0");
+
+  useEffect(() => {
+    async function hydrateSession() {
+      if (!wallet.provider || !wallet.account || wallet.chainId !== getExpectedChainId()) {
+        setDetectedRole("student");
+        setCreditsBalance("0");
+        return;
+      }
+
+      const [role, balance] = await Promise.all([
+        detectRole(wallet.provider, wallet.account),
+        readCreditsBalance(wallet.provider, wallet.account),
+      ]);
+
+      setDetectedRole(role);
+      setCreditsBalance(balance);
+    }
+
+    void hydrateSession();
+  }, [wallet.account, wallet.chainId, wallet.provider]);
+
+  const role = wallet.isConnected ? detectedRole : previewRole;
+  const identity = wallet.account ? formatConnectedIdentity(role, wallet.account) : previewIdentities[previewRole];
+  const chainLabel =
+    wallet.chainId === getExpectedChainId()
+      ? getExpectedChainLabel()
+      : wallet.chainId
+        ? `Wrong network · ${wallet.chainId}`
+        : getExpectedChainLabel();
+
+  return useMemo(
+    () => ({
+      role,
+      identity,
+      chainLabel,
+      creditsBalance,
+      setRole: setPreviewRole,
+      connectWallet: wallet.connectWallet,
+      isConnected: wallet.isConnected,
+      isConnecting: wallet.isConnecting,
+      hasWallet: wallet.hasWallet,
+      account: wallet.account,
+      chainId: wallet.chainId,
+      isCorrectNetwork: wallet.chainId === getExpectedChainId(),
+      error: wallet.error,
+      provider: wallet.provider,
+    }),
+    [
+      role,
+      identity,
+      chainLabel,
+      creditsBalance,
+      wallet.connectWallet,
+      wallet.isConnected,
+      wallet.isConnecting,
+      wallet.hasWallet,
+      wallet.account,
+      wallet.chainId,
+      wallet.error,
+      wallet.provider,
+    ],
+  );
+}

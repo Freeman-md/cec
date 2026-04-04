@@ -1,5 +1,5 @@
 import { Link, useParams } from "react-router-dom";
-import type { AppRole } from "../hooks/usePreviewSession";
+import type { AppRole } from "../types/app";
 import { PageIntro } from "../components/PageIntro";
 
 type EventDetailPageProps = {

@@ -1,7 +1,7 @@
 import { BrowserRouter, NavLink, Navigate, Route, Routes } from "react-router-dom";
 import { AppHeader } from "./components/AppHeader";
 import { PageFrame } from "./components/PageFrame";
-import { usePreviewSession } from "./hooks/usePreviewSession";
+import { useAppSession } from "./hooks/useAppSession";
 import { AdminConsolePage } from "./pages/AdminConsolePage";
 import { CreditsPurchasePage } from "./pages/CreditsPurchasePage";
 import { DiscoverPage } from "./pages/DiscoverPage";
@@ -11,7 +11,7 @@ import { OrganizerStudioPage } from "./pages/OrganizerStudioPage";
 import { WalletDashboardPage } from "./pages/WalletDashboardPage";
 
 export function App() {
-  const session = usePreviewSession();
+  const session = useAppSession();
   const footerNavClassName = ({ isActive }: { isActive: boolean }) => (isActive ? "active" : undefined);
 
   return (

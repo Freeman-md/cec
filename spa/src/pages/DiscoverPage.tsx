@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import type { AppRole } from "../hooks/usePreviewSession";
+import type { AppRole } from "../types/app";
 
 type DiscoverPageProps = {
   session: {
