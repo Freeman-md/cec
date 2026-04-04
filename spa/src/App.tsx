@@ -1,4 +1,5 @@
 import contractInfo from "./config/contract-info.json";
+import { designSystem } from "./design/designSystem";
 
 export function App() {
   return (
@@ -7,10 +8,13 @@ export function App() {
         <div className="container is-max-desktop">
           <div className="hero-card">
             <p className="eyebrow">Phase 6 rebuild</p>
-            <h1 className="title is-1">NeonCurator SPA</h1>
+            <h1 className="title is-1">{designSystem.projectTitle}</h1>
             <p className="subtitle is-5">
               The frontend has been reset to a clean boilerplate so the final UI can be rebuilt
               iteratively from the Stitch-approved designs and the Phase 6 checklist.
+            </p>
+            <p className="subtitle is-6 design-system-note">
+              Active design system: {designSystem.themeName}
             </p>
           </div>
 

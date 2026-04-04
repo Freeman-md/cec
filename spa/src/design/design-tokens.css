@@ -1,0 +1,22 @@
+:root {
+  --nc-background: #11131c;
+  --nc-surface: #11131c;
+  --nc-surface-low: #191b24;
+  --nc-surface-card: #1d1f29;
+  --nc-surface-card-high: #282933;
+  --nc-surface-float: rgba(50, 52, 62, 0.6);
+  --nc-on-surface: #e1e1ef;
+  --nc-on-surface-variant: #bbc9cf;
+  --nc-primary: #a8e8ff;
+  --nc-primary-strong: #00d4ff;
+  --nc-secondary: #d1bcff;
+  --nc-secondary-strong: #7000ff;
+  --nc-tertiary: #00fea2;
+  --nc-outline-ghost: rgba(60, 73, 78, 0.15);
+  --nc-error: #ffb4ab;
+  --nc-error-container: rgba(147, 0, 10, 0.2);
+  --nc-shadow-ambient: 0 20px 40px rgba(12, 14, 23, 0.5);
+  --nc-radius-card: 1rem;
+  --nc-radius-button: 0.75rem;
+  --nc-blur-overlay: blur(12px);
+}
