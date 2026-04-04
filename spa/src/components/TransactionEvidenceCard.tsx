@@ -24,7 +24,7 @@ export function TransactionEvidenceCard({
       {!evidence ? (
         <div className="simple-panel">
           <h3 className="title is-5">No transaction recorded yet</h3>
-          <p className="meta-line">Complete a credit purchase or ticket purchase to populate this evidence panel.</p>
+          <p className="meta-line">Complete a transaction in the app to populate this evidence panel.</p>
         </div>
       ) : (
         <div className="info-list">

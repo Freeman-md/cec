@@ -314,7 +314,7 @@ export function EventDetailPage({ session }: EventDetailPageProps) {
               <p className="subtitle is-6">{content.organizerSummary}</p>
             </div>
             <div className="info-block">
-              <h3 className="title is-6">Why this proves CW2</h3>
+              <h3 className="title is-6">Included benefits</h3>
               <ul className="simple-list">
                 {content.benefits.map((benefit) => (
                   <li key={benefit}>{benefit}</li>

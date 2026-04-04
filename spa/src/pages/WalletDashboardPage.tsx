@@ -23,7 +23,7 @@ export function WalletDashboardPage({ session }: WalletDashboardPageProps) {
       <PageIntro
         eyebrow="Wallet"
         title="Account overview"
-        summary="Track the connected account, current network, live CEC balance, and the latest transaction captured by the app."
+        summary="Review the connected account, current network, live CEC balance, and the latest on-chain transaction."
       />
 
       <div className="card-grid card-grid--two">
@@ -40,8 +40,8 @@ export function WalletDashboardPage({ session }: WalletDashboardPageProps) {
           <p className="meta-line">
             {session.isConnected
               ? session.isCorrectNetwork
-                ? "Live contract balance loaded from the connected wallet."
-                : "Switch to the configured localhost network to load accurate balances."
+                ? "Live credit balance loaded from the connected wallet."
+                : "Switch to the configured localhost network to load the correct balance."
               : "Connect a wallet to load balances and transaction evidence."}
           </p>
         </section>

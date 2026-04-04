@@ -14,7 +14,7 @@ export function AdminConsolePage({ session }: AdminConsolePageProps) {
       allowedRole="admin"
       currentRole={session.role}
       title="Admin access only"
-      message="Switch the preview role to Admin to view the console skeleton. This route intentionally does not use a sidebar."
+      message="Connect with the admin wallet to approve organizers and manage the exchange rate."
     >
       <div className="page-stack">
         <PageIntro

@@ -27,7 +27,7 @@ export function OrganizerStudioPage({ session }: OrganizerStudioPageProps) {
       allowedRole="organizer"
       currentRole={session.role}
       title="Organizer access only"
-      message="Switch the preview role to Organizer to work through the studio skeleton and sidebar layout."
+      message="Connect with an approved organizer wallet to manage events and ticket tiers."
     >
       <div className="page-stack">
         <PageIntro

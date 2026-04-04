@@ -128,28 +128,11 @@ body {
   gap: 1rem;
 }
 
-.preview-role-control {
-  display: grid;
-  gap: 0.25rem;
-}
-
-.preview-role-control__label,
 .meta-line,
 .footer-copy,
 .placeholder-label {
   color: #6b7280;
   font-size: 0.85rem;
-}
-
-.preview-role-control .select select {
-  background: #ffffff;
-  border-color: #bfdbfe;
-  box-shadow: none;
-  color: #1e3a8a;
-}
-
-.preview-role-control .select:not(.is-multiple):not(.is-loading)::after {
-  border-color: #2563eb;
 }
 
 .identity-chip,

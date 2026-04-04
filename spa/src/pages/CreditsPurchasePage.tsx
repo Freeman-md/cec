@@ -194,7 +194,7 @@ export function CreditsPurchasePage({ session }: CreditsPurchasePageProps) {
       <PageIntro
         eyebrow="Credits purchase"
         title="Buy CEC Tokens"
-        summary="This page handles the first real UI-triggered on-chain transaction for the CW2 SPA: buying CEC with ETH."
+        summary="Buy Campus Event Credits with ETH and review the resulting transaction evidence."
       />
 
       <div className="page-two-column">
