@@ -2,7 +2,7 @@
   "networkName": "localhost",
   "chainId": 31337,
   "creditsToken": {
-    "address": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+    "address": "0x959922bE3CAee4b8Cd9a407cc3ac1C251C2007B1",
     "abi": [
       {
         "type": "constructor",
@@ -509,7 +509,7 @@
     ]
   },
   "eventPlatform": {
-    "address": "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e",
+    "address": "0x3Aa5ebB10DC797CAC828524e59A333d0A371443c",
     "abi": [
       {
         "type": "constructor",
@@ -1205,7 +1205,7 @@
     ]
   },
   "ticketNFT": {
-    "address": "0x8A791620dd6260079BF849Dc5567aDC3F2FdC318",
+    "address": "0x9A9f2CCfdE556A7E9Ff0848998Aa4a0CFD8863AE",
     "abi": [
       {
         "type": "constructor",

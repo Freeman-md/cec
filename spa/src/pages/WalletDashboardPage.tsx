@@ -1,5 +1,6 @@
-import type { AppRole } from "../types/app";
 import { PageIntro } from "../components/PageIntro";
+import { TransactionEvidenceCard } from "../components/TransactionEvidenceCard";
+import type { AppRole } from "../types/app";
 
 type WalletDashboardPageProps = {
   session: {
@@ -9,6 +10,10 @@ type WalletDashboardPageProps = {
       label: string;
     };
     chainLabel: string;
+    creditsBalance: string;
+    isConnected: boolean;
+    isCorrectNetwork: boolean;
+    latestTransaction: import("../types/app").TransactionEvidence | null;
   };
 };
 
@@ -16,9 +21,9 @@ export function WalletDashboardPage({ session }: WalletDashboardPageProps) {
   return (
     <div className="page-stack">
       <PageIntro
-        eyebrow="Wallet dashboard"
-        title="Cryptographic proof surfaces"
-        summary="This route locks the final dashboard layout while removing unsupported DeFi-style actions from the rebuild."
+        eyebrow="Wallet"
+        title="Account overview"
+        summary="Track the connected account, current network, live CEC balance, and the latest transaction captured by the app."
       />
 
       <div className="card-grid card-grid--two">
@@ -30,31 +35,19 @@ export function WalletDashboardPage({ session }: WalletDashboardPageProps) {
         </section>
 
         <section className="surface-card">
-          <p className="eyebrow">Portfolio</p>
-          <h2 className="title is-4">CEC and transaction summary</h2>
-          <p className="meta-line">This page will keep balance, activity, and latest transaction evidence in one place.</p>
+          <p className="eyebrow">Balance</p>
+          <h2 className="title is-4">{session.creditsBalance} CEC</h2>
+          <p className="meta-line">
+            {session.isConnected
+              ? session.isCorrectNetwork
+                ? "Live contract balance loaded from the connected wallet."
+                : "Switch to the configured localhost network to load accurate balances."
+              : "Connect a wallet to load balances and transaction evidence."}
+          </p>
         </section>
       </div>
 
-      <section className="surface-card">
-        <div className="section-heading">
-          <div>
-            <p className="eyebrow">Latest evidence</p>
-            <h2 className="title is-4">Reserved transaction proof panel</h2>
-          </div>
-          <span className="status-pill status-pill--success">Visible in demo</span>
-        </div>
-        <div className="placeholder-inline-grid">
-          <div className="placeholder-card">
-            <p className="placeholder-label">Transaction hash</p>
-            <p className="placeholder-value placeholder-value--small mono-line">0x4f3e...b92a7c41deef2a3b</p>
-          </div>
-          <div className="placeholder-card">
-            <p className="placeholder-label">Block and gas</p>
-            <p className="placeholder-value placeholder-value--small">#18,432,012 · 21,000 gas</p>
-          </div>
-        </div>
-      </section>
+      <TransactionEvidenceCard evidence={session.latestTransaction} statusLabel={session.latestTransaction?.receiptStatus ?? "Idle"} />
     </div>
   );
 }

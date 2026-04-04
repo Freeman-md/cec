@@ -22,6 +22,8 @@ type EventDetailPageProps = {
     creditsBalance: string;
     refreshSession: () => Promise<void>;
     connectWallet: () => void;
+    latestTransaction: import("../types/app").TransactionEvidence | null;
+    setLatestTransaction: (evidence: import("../types/app").TransactionEvidence | null) => void;
   };
 };
 
@@ -192,14 +194,35 @@ export function EventDetailPage({ session }: EventDetailPageProps) {
       const signer = await session.provider.getSigner();
       const { creditsToken, eventPlatform } = getAppContracts(signer);
       const tx = await creditsToken.approve(await eventPlatform.getAddress(), selectedTier.priceInCredits);
-      await tx.wait();
+      session.setLatestTransaction({
+        hash: tx.hash,
+        receiptStatus: "Pending",
+        blockNumber: "-",
+        gasUsed: "-",
+        summary: `Approving ${selectedTier.label} for purchase.`,
+      });
+      const receipt = await tx.wait();
       await refreshEventState();
 
       setStatus("success");
       setResultMessage(`Approved ${selectedTier.label} for purchase.`);
+      session.setLatestTransaction({
+        hash: tx.hash,
+        receiptStatus: "Confirmed",
+        blockNumber: receipt ? String(receipt.blockNumber) : "-",
+        gasUsed: receipt ? receipt.gasUsed.toString() : "-",
+        summary: `Approved ${selectedTier.label} for purchase.`,
+      });
     } catch (error) {
       setStatus("failed");
       setErrorMessage(error instanceof Error ? error.message : "Approval failed.");
+      session.setLatestTransaction({
+        hash: "-",
+        receiptStatus: "Failed",
+        blockNumber: "-",
+        gasUsed: "-",
+        summary: "Ticket purchase approval failed.",
+      });
     }
   }
 
@@ -217,6 +240,13 @@ export function EventDetailPage({ session }: EventDetailPageProps) {
       const signer = await session.provider.getSigner();
       const { eventPlatform } = getAppContracts(signer);
       const tx = await eventPlatform.obtainTicketWithCredits(demoData.featuredEventId, selectedTier.tierId);
+      session.setLatestTransaction({
+        hash: tx.hash,
+        receiptStatus: "Pending",
+        blockNumber: "-",
+        gasUsed: "-",
+        summary: `Purchasing ${selectedTier.label}.`,
+      });
       const receipt = await tx.wait();
 
       await session.refreshSession();
@@ -228,9 +258,23 @@ export function EventDetailPage({ session }: EventDetailPageProps) {
           ? `${selectedTier.label} purchased successfully. Ticket minted on-chain.`
           : "Purchase transaction completed with a non-success receipt.",
       );
+      session.setLatestTransaction({
+        hash: tx.hash,
+        receiptStatus: receipt?.status === 1 ? "Confirmed" : "Failed",
+        blockNumber: receipt ? String(receipt.blockNumber) : "-",
+        gasUsed: receipt ? receipt.gasUsed.toString() : "-",
+        summary: receipt?.status === 1 ? `${selectedTier.label} ticket purchased.` : "Ticket purchase returned a failed receipt.",
+      });
     } catch (error) {
       setStatus("failed");
       setErrorMessage(error instanceof Error ? error.message : "Ticket purchase failed.");
+      session.setLatestTransaction({
+        hash: "-",
+        receiptStatus: "Failed",
+        blockNumber: "-",
+        gasUsed: "-",
+        summary: "Ticket purchase failed.",
+      });
     }
   }
 

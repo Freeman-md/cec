@@ -1,22 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { detectRole, getExpectedChainId, getExpectedChainLabel, readCreditsBalance } from "../lib/contracts";
 import { useWallet } from "./useWallet";
-import type { AppRole, SessionIdentity } from "../types/app";
-
-const previewIdentities: Record<AppRole, SessionIdentity> = {
-  student: {
-    account: "0x71C0...4F2",
-    label: "Student",
-  },
-  organizer: {
-    account: "0x0RG4...1Z3",
-    label: "Approved Organizer",
-  },
-  admin: {
-    account: "0xADm1...001",
-    label: "Admin",
-  },
-};
+import type { AppRole, SessionIdentity, TransactionEvidence } from "../types/app";
 
 function formatConnectedIdentity(role: AppRole, account: string): SessionIdentity {
   const roleLabels: Record<AppRole, string> = {
@@ -33,9 +18,9 @@ function formatConnectedIdentity(role: AppRole, account: string): SessionIdentit
 
 export function useAppSession() {
   const wallet = useWallet();
-  const [previewRole, setPreviewRole] = useState<AppRole>("student");
   const [detectedRole, setDetectedRole] = useState<AppRole>("student");
   const [creditsBalance, setCreditsBalance] = useState("0");
+  const [latestTransaction, setLatestTransaction] = useState<TransactionEvidence | null>(null);
 
   const refreshSession = useCallback(async () => {
     if (!wallet.provider || !wallet.account || wallet.chainId !== getExpectedChainId()) {
@@ -57,8 +42,13 @@ export function useAppSession() {
     void refreshSession();
   }, [refreshSession]);
 
-  const role = wallet.isConnected ? detectedRole : previewRole;
-  const identity = wallet.account ? formatConnectedIdentity(role, wallet.account) : previewIdentities[previewRole];
+  const role = detectedRole;
+  const identity = wallet.account
+    ? formatConnectedIdentity(role, wallet.account)
+    : ({
+        account: "Connect wallet",
+        label: "Wallet not connected",
+      } satisfies SessionIdentity);
   const chainLabel =
     wallet.chainId === getExpectedChainId()
       ? getExpectedChainLabel()
@@ -73,7 +63,6 @@ export function useAppSession() {
       chainLabel,
       creditsBalance,
       refreshSession,
-      setRole: setPreviewRole,
       connectWallet: wallet.connectWallet,
       isConnected: wallet.isConnected,
       isConnecting: wallet.isConnecting,
@@ -83,6 +72,8 @@ export function useAppSession() {
       isCorrectNetwork: wallet.chainId === getExpectedChainId(),
       error: wallet.error,
       provider: wallet.provider,
+      latestTransaction,
+      setLatestTransaction,
     }),
     [
       role,
@@ -98,6 +89,7 @@ export function useAppSession() {
       wallet.chainId,
       wallet.error,
       wallet.provider,
+      latestTransaction,
     ],
   );
 }

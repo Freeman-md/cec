@@ -1,6 +1,7 @@
 import { formatEther, parseEther } from "ethers";
 import { useEffect, useMemo, useState } from "react";
 import { PageIntro } from "../components/PageIntro";
+import { TransactionEvidenceCard } from "../components/TransactionEvidenceCard";
 import { getAppContracts, readCreditsBalance, readExchangeRate } from "../lib/contracts";
 import type { AppRole } from "../types/app";
 
@@ -14,24 +15,12 @@ type CreditsPurchasePageProps = {
     creditsBalance: string;
     refreshSession: () => Promise<void>;
     connectWallet: () => void;
+    latestTransaction: import("../types/app").TransactionEvidence | null;
+    setLatestTransaction: (evidence: import("../types/app").TransactionEvidence | null) => void;
   };
 };
 
 type TransactionStatus = "idle" | "pending" | "success" | "failed";
-
-type TransactionEvidence = {
-  hash: string;
-  receiptStatus: string;
-  blockNumber: string;
-  gasUsed: string;
-};
-
-const defaultEvidence: TransactionEvidence = {
-  hash: "-",
-  receiptStatus: "Idle",
-  blockNumber: "-",
-  gasUsed: "-",
-};
 
 function formatDisplayAmount(value: string, maximumFractionDigits = 4) {
   const asNumber = Number(value);
@@ -52,7 +41,6 @@ export function CreditsPurchasePage({ session }: CreditsPurchasePageProps) {
   const [ethBalance, setEthBalance] = useState("0");
   const [status, setStatus] = useState<TransactionStatus>("idle");
   const [errorMessage, setErrorMessage] = useState("");
-  const [evidence, setEvidence] = useState<TransactionEvidence>(defaultEvidence);
   const [beforeCreditsBalance, setBeforeCreditsBalance] = useState("0");
   const [afterCreditsBalance, setAfterCreditsBalance] = useState("0");
   const [beforeEthBalance, setBeforeEthBalance] = useState("0");
@@ -137,18 +125,21 @@ export function CreditsPurchasePage({ session }: CreditsPurchasePageProps) {
     try {
       setStatus("pending");
       setErrorMessage("");
-      setBeforeCreditsBalance(session.creditsBalance);
-      setBeforeEthBalance(ethBalance);
+      const startingCreditsBalance = session.creditsBalance;
+      const startingEthBalance = ethBalance;
+      setBeforeCreditsBalance(startingCreditsBalance);
+      setBeforeEthBalance(startingEthBalance);
 
       const signer = await session.provider.getSigner();
       const { eventPlatform } = getAppContracts(signer);
       const tx = await eventPlatform.buyCreditsWithEth({ value: parsedEthAmount });
 
-      setEvidence({
+      session.setLatestTransaction({
         hash: tx.hash,
         receiptStatus: "Pending",
         blockNumber: "-",
         gasUsed: "-",
+        summary: "CEC credit purchase submitted.",
       });
 
       const receipt = await tx.wait();
@@ -164,21 +155,27 @@ export function CreditsPurchasePage({ session }: CreditsPurchasePageProps) {
       setAfterEthBalance(refreshedEthBalanceDisplay);
       setEthBalance(refreshedEthBalanceDisplay);
       setStatus("success");
-      setEvidence({
+      session.setLatestTransaction({
         hash: tx.hash,
         receiptStatus: receipt?.status === 1 ? "Confirmed" : "Failed",
         blockNumber: receipt ? String(receipt.blockNumber) : "-",
         gasUsed: receipt ? receipt.gasUsed.toString() : "-",
+        beforeCreditsBalance: formatDisplayAmount(startingCreditsBalance),
+        afterCreditsBalance: formatDisplayAmount(refreshedCreditsBalance),
+        beforeEthBalance: `${formatDisplayAmount(startingEthBalance)} ETH`,
+        afterEthBalance: `${formatDisplayAmount(refreshedEthBalanceDisplay)} ETH`,
+        summary: "CEC credits purchased successfully.",
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Transaction failed.";
       setStatus("failed");
       setErrorMessage(message);
-      setEvidence({
-        hash: defaultEvidence.hash,
+      session.setLatestTransaction({
+        hash: "-",
         receiptStatus: "Failed",
-        blockNumber: defaultEvidence.blockNumber,
-        gasUsed: defaultEvidence.gasUsed,
+        blockNumber: "-",
+        gasUsed: "-",
+        summary: "CEC credit purchase failed.",
       });
     }
   }
@@ -278,46 +275,11 @@ export function CreditsPurchasePage({ session }: CreditsPurchasePageProps) {
           </div>
         </section>
 
-        <section className="surface-card">
-          <div className="section-heading">
-            <div>
-              <p className="eyebrow">Transaction evidence</p>
-              <h2 className="title is-4">Live receipt surface</h2>
-            </div>
-            <span className={statusClassName}>{status.toUpperCase()}</span>
-          </div>
-
-          <div className="info-list">
-            <div className="info-block">
-              <h3 className="title is-6">Tx hash</h3>
-              <p className="meta-line mono-line">{evidence.hash}</p>
-            </div>
-            <div className="info-block">
-              <h3 className="title is-6">Receipt status</h3>
-              <p className="meta-line">{evidence.receiptStatus}</p>
-            </div>
-            <div className="info-block">
-              <h3 className="title is-6">Block number</h3>
-              <p className="meta-line">{evidence.blockNumber}</p>
-            </div>
-            <div className="info-block">
-              <h3 className="title is-6">Gas used</h3>
-              <p className="meta-line">{evidence.gasUsed}</p>
-            </div>
-            <div className="info-block">
-              <h3 className="title is-6">Before / after CEC balance</h3>
-              <p className="meta-line">
-                {beforeCreditsBalance ? `${formatDisplayAmount(beforeCreditsBalance)} -> ${formatDisplayAmount(afterCreditsBalance || session.creditsBalance)}` : "-"}
-              </p>
-            </div>
-            <div className="info-block">
-              <h3 className="title is-6">Before / after ETH balance</h3>
-              <p className="meta-line">
-                {beforeEthBalance ? `${formatDisplayAmount(beforeEthBalance)} -> ${formatDisplayAmount(afterEthBalance || ethBalance)} ETH` : "-"}
-              </p>
-            </div>
-          </div>
-        </section>
+        <TransactionEvidenceCard
+          evidence={session.latestTransaction}
+          statusLabel={status.toUpperCase()}
+          title="Live receipt surface"
+        />
       </div>
     </div>
   );

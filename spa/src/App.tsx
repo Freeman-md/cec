@@ -22,7 +22,7 @@ export function App() {
           <footer className="app-footer">
             <div>
               <p className="footer-brand">NeonCurator</p>
-              <p className="footer-copy">Role-aware campus event ticketing dApp for the final CW2 rebuild.</p>
+              <p className="footer-copy">Campus event ticketing dApp powered by CEC credits and NFT ticket ownership.</p>
             </div>
             <div className="footer-links">
               <NavLink to="/" className={footerNavClassName}>
