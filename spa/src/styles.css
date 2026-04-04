@@ -20,14 +20,141 @@ body {
 
 .app-shell {
   min-height: 100vh;
+  position: relative;
 }
 
-.hero-card,
-.panel-card {
+.app-shell__background {
+  inset: 0;
+  position: fixed;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(0, 212, 255, 0.08), transparent 18%),
+    radial-gradient(circle at 80% 10%, rgba(112, 0, 255, 0.12), transparent 18%);
+}
+
+.app-shell__content {
+  position: relative;
+  z-index: 1;
+}
+
+.page-container {
+  margin: 0 auto;
+  max-width: 1280px;
+  padding: 1.25rem 1.25rem 2rem;
+}
+
+.app-header {
+  align-items: center;
+  backdrop-filter: var(--nc-blur-overlay);
+  background: rgba(12, 14, 23, 0.75);
+  display: flex;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 1rem 1.25rem;
+  position: sticky;
+  top: 0;
+  z-index: 4;
+}
+
+.app-header__brand,
+.brand-mark {
+  color: var(--nc-on-surface);
+  font-family: "Manrope", "Inter", "Segoe UI", sans-serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.app-header__nav,
+.app-header__controls,
+.button-row,
+.chip-row,
+.section-heading,
+.feature-card__footer,
+.ticket-card__header,
+.page-intro,
+.placeholder-inline-grid,
+.footer-links {
+  align-items: center;
+  display: flex;
+  gap: 0.75rem;
+}
+
+.app-header__nav {
+  flex: 1;
+  justify-content: center;
+}
+
+.app-header__nav a,
+.footer-links a,
+.role-sidebar__nav a {
+  color: var(--nc-on-surface-variant);
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.app-header__nav a.active,
+.footer-links a.active,
+.role-sidebar__nav a.active {
+  color: var(--nc-primary);
+}
+
+.app-header__controls {
+  justify-content: flex-end;
+}
+
+.preview-role-control {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.preview-role-control__label,
+.meta-line,
+.footer-copy,
+.placeholder-label {
+  color: var(--nc-on-surface-variant);
+  font-size: 0.85rem;
+}
+
+.identity-chip {
+  background: rgba(29, 31, 41, 0.9);
+  border-radius: 999px;
+  box-shadow: var(--nc-shadow-ambient);
+  display: grid;
+  gap: 0.1rem;
+  padding: 0.65rem 1rem;
+}
+
+.identity-chip__role {
+  color: var(--nc-primary);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.identity-chip__account,
+.identity-chip__chain,
+.mono-line {
+  color: var(--nc-on-surface);
+  font-family: "IBM Plex Mono", "SFMono-Regular", monospace;
+  font-size: 0.78rem;
+}
+
+.page-stack {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.surface-card {
   background: linear-gradient(180deg, rgba(29, 31, 41, 0.92) 0%, rgba(25, 27, 36, 0.96) 100%);
   border-radius: 28px;
   box-shadow: var(--nc-shadow-ambient);
   padding: 2rem;
+}
+
+.surface-card--hero {
+  padding: 2.25rem;
 }
 
 .eyebrow {
@@ -56,6 +183,159 @@ code {
   padding-left: 1.25rem;
 }
 
+.page-intro {
+  justify-content: space-between;
+}
+
+.page-intro__actions {
+  flex-shrink: 0;
+}
+
+.button-row {
+  flex-wrap: wrap;
+}
+
+.section-heading {
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.card-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.card-grid--three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.card-grid--two,
+.page-two-column {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.feature-card,
+.ticket-card,
+.placeholder-card,
+.tier-card,
+.access-card,
+.role-sidebar,
+.info-block {
+  background: rgba(17, 19, 28, 0.75);
+  border-radius: 22px;
+  padding: 1rem;
+}
+
+.feature-card__image,
+.ticket-card__image {
+  aspect-ratio: 16 / 10;
+  background:
+    linear-gradient(135deg, rgba(0, 212, 255, 0.25), rgba(112, 0, 255, 0.1)),
+    linear-gradient(180deg, rgba(17, 19, 28, 0.5), rgba(17, 19, 28, 0.8));
+  border-radius: 18px;
+  margin-bottom: 1rem;
+}
+
+.feature-card__body,
+.ticket-card__body,
+.placeholder-stack,
+.tier-stack,
+.info-list,
+.role-sidebar__nav {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.price-pill,
+.status-pill {
+  border-radius: 999px;
+  display: inline-flex;
+  font-size: 0.76rem;
+  font-weight: 700;
+  line-height: 1;
+  padding: 0.45rem 0.7rem;
+}
+
+.status-pill {
+  background: rgba(187, 201, 207, 0.1);
+  color: var(--nc-on-surface-variant);
+}
+
+.status-pill--active {
+  background: rgba(0, 254, 162, 0.12);
+  color: var(--nc-tertiary);
+}
+
+.status-pill--success {
+  background: rgba(0, 212, 255, 0.12);
+  color: var(--nc-primary);
+}
+
+.status-pill--used,
+.status-pill--info {
+  background: rgba(168, 232, 255, 0.12);
+  color: var(--nc-primary);
+}
+
+.status-pill--error {
+  background: rgba(147, 0, 10, 0.22);
+  color: var(--nc-error);
+}
+
+.status-pill--ghost,
+.price-pill {
+  background: rgba(112, 0, 255, 0.12);
+  color: var(--nc-secondary);
+}
+
+.tier-card--selected {
+  outline: 2px solid rgba(168, 232, 255, 0.32);
+}
+
+.tier-card--disabled {
+  opacity: 0.6;
+}
+
+.placeholder-value {
+  color: var(--nc-on-surface);
+  font-family: "Manrope", "Inter", "Segoe UI", sans-serif;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.placeholder-value--small {
+  font-size: 1rem;
+}
+
+.page-with-sidebar {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 240px minmax(0, 1fr);
+}
+
+.role-sidebar {
+  align-self: start;
+  position: sticky;
+  top: 5.8rem;
+}
+
+.role-sidebar__nav a {
+  background: rgba(29, 31, 41, 0.9);
+  border-radius: 14px;
+  padding: 0.85rem 1rem;
+}
+
+.app-footer {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin: 0 auto;
+  max-width: 1280px;
+  padding: 1.25rem 1.25rem 2.5rem;
+}
+
 .design-system-note {
   color: var(--nc-on-surface-variant) !important;
 }
@@ -64,4 +344,29 @@ code {
   background: rgba(168, 232, 255, 0.08);
   border-radius: 8px;
   padding: 0.12rem 0.35rem;
+}
+
+@media (max-width: 1023px) {
+  .app-header,
+  .app-header__controls,
+  .app-header__nav,
+  .page-intro,
+  .page-two-column,
+  .card-grid--two,
+  .card-grid--three,
+  .page-with-sidebar,
+  .app-footer {
+    grid-template-columns: 1fr;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .app-header__nav {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .role-sidebar {
+    position: static;
+  }
 }

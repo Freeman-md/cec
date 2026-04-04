@@ -1,57 +1,54 @@
-import contractInfo from "./config/contract-info.json";
-import { designSystem } from "./design/designSystem";
+import { BrowserRouter, NavLink, Navigate, Route, Routes } from "react-router-dom";
+import { AppHeader } from "./components/AppHeader";
+import { PageFrame } from "./components/PageFrame";
+import { usePreviewSession } from "./hooks/usePreviewSession";
+import { AdminConsolePage } from "./pages/AdminConsolePage";
+import { CreditsPurchasePage } from "./pages/CreditsPurchasePage";
+import { DiscoverPage } from "./pages/DiscoverPage";
+import { EventDetailPage } from "./pages/EventDetailPage";
+import { MyTicketsPage } from "./pages/MyTicketsPage";
+import { OrganizerStudioPage } from "./pages/OrganizerStudioPage";
+import { WalletDashboardPage } from "./pages/WalletDashboardPage";
 
 export function App() {
+  const session = usePreviewSession();
+  const footerNavClassName = ({ isActive }: { isActive: boolean }) => (isActive ? "active" : undefined);
+
   return (
-    <main className="app-shell">
-      <section className="section">
-        <div className="container is-max-desktop">
-          <div className="hero-card">
-            <p className="eyebrow">Phase 6 rebuild</p>
-            <h1 className="title is-1">{designSystem.projectTitle}</h1>
-            <p className="subtitle is-5">
-              The frontend has been reset to a clean boilerplate so the final UI can be rebuilt
-              iteratively from the Stitch-approved designs and the Phase 6 checklist.
-            </p>
-            <p className="subtitle is-6 design-system-note">
-              Active design system: {designSystem.themeName}
-            </p>
-          </div>
-
-          <div className="columns is-variable is-5 mt-2">
-            <div className="column is-7">
-              <div className="panel-card">
-                <p className="eyebrow">Next implementation order</p>
-                <ol className="content ordered-list">
-                  <li>Lock the final Stitch direction.</li>
-                  <li>Rebuild the shared shell and dynamic role-aware header.</li>
-                  <li>Implement role detection and contract helpers.</li>
-                  <li>Build Discover, Event Detail, and Credits Purchase.</li>
-                  <li>Add My Tickets, Wallet Dashboard, Organizer Studio, and Admin Console.</li>
-                </ol>
-              </div>
+    <BrowserRouter>
+      <PageFrame
+        header={<AppHeader session={session} />}
+        footer={
+          <footer className="app-footer">
+            <div>
+              <p className="footer-brand">NeonCurator</p>
+              <p className="footer-copy">Role-aware campus event ticketing dApp for the final CW2 rebuild.</p>
             </div>
-
-            <div className="column is-5">
-              <div className="panel-card">
-                <p className="eyebrow">Local contract bridge</p>
-                <div className="content">
-                  <p>
-                    The deploy script still writes contract metadata to
-                    <code> src/config/contract-info.json</code>.
-                  </p>
-                  <ul>
-                    <li>Network: {contractInfo.networkName}</li>
-                    <li>Chain ID: {contractInfo.chainId}</li>
-                    <li>CreditsToken: {contractInfo.creditsToken.address}</li>
-                    <li>EventPlatform: {contractInfo.eventPlatform.address}</li>
-                  </ul>
-                </div>
-              </div>
+            <div className="footer-links">
+              <NavLink to="/" className={footerNavClassName}>
+                Discover
+              </NavLink>
+              <NavLink to="/my-tickets" className={footerNavClassName}>
+                My Tickets
+              </NavLink>
+              <NavLink to="/wallet" className={footerNavClassName}>
+                Wallet
+              </NavLink>
             </div>
-          </div>
-        </div>
-      </section>
-    </main>
+          </footer>
+        }
+      >
+        <Routes>
+          <Route path="/" element={<DiscoverPage session={session} />} />
+          <Route path="/events/:eventSlug" element={<EventDetailPage session={session} />} />
+          <Route path="/credits" element={<CreditsPurchasePage session={session} />} />
+          <Route path="/my-tickets" element={<MyTicketsPage session={session} />} />
+          <Route path="/wallet" element={<WalletDashboardPage session={session} />} />
+          <Route path="/organizer/*" element={<OrganizerStudioPage session={session} />} />
+          <Route path="/admin" element={<AdminConsolePage session={session} />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </PageFrame>
+    </BrowserRouter>
   );
 }
