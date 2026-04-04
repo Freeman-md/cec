@@ -242,27 +242,6 @@ export function EventDetailPage({ session }: EventDetailPageProps) {
         eyebrow={content.eyebrow}
         title={content.title}
         summary={content.summary}
-        actions={
-          <div className="button-row">
-            <Link className="button is-primary" to="/credits">
-              Buy More Credits
-            </Link>
-            <button
-              className="button is-link is-light"
-              type="button"
-              disabled={
-                status === "pending" ||
-                !selectedTier ||
-                Boolean(blockingMessage && !needsApproval) ||
-                !session.isConnected ||
-                !session.isCorrectNetwork
-              }
-              onClick={needsApproval ? handleApprove : handlePurchase}
-            >
-              {status === "pending" ? "Processing..." : actionButtonLabel}
-            </button>
-          </div>
-        }
       />
 
       <div className="page-two-column">
@@ -336,6 +315,26 @@ export function EventDetailPage({ session }: EventDetailPageProps) {
               <h3 className="title is-6">Allowance status</h3>
               <p className="meta-line">{selectedTier ? (needsApproval ? "Approval required before purchase" : "Allowance ready for purchase") : "Select a tier"}</p>
             </div>
+          </div>
+
+          <div className="buttons mt-4">
+            <button
+              className="button is-primary"
+              type="button"
+              disabled={
+                status === "pending" ||
+                !selectedTier ||
+                Boolean(blockingMessage && !needsApproval) ||
+                !session.isConnected ||
+                !session.isCorrectNetwork
+              }
+              onClick={needsApproval ? handleApprove : handlePurchase}
+            >
+              {status === "pending" ? "Processing..." : actionButtonLabel}
+            </button>
+            <Link className="button is-light" to="/credits">
+              Buy More Credits
+            </Link>
           </div>
 
           {blockingMessage ? <p className="help is-danger mt-4">{blockingMessage}</p> : null}
