@@ -267,6 +267,11 @@ code {
   min-width: 0;
 }
 
+.event-detail-actions {
+  display: grid;
+  gap: 0.75rem;
+}
+
 .role-sidebar {
   padding: 1rem;
 }
