@@ -83,11 +83,11 @@ export function DiscoverPage({ session }: DiscoverPageProps) {
             <h2 className="title is-4">Simple event discovery for CW2</h2>
           </div>
           <div className="tags">
-            <span className="tag is-dark">All Events</span>
-            <span className="tag is-dark">Music</span>
-            <span className="tag is-dark">Sports</span>
-            <span className="tag is-dark">Workshops</span>
-            <span className="tag is-dark">Arts</span>
+            <span className="tag app-tag">All Events</span>
+            <span className="tag app-tag">Music</span>
+            <span className="tag app-tag">Sports</span>
+            <span className="tag app-tag">Workshops</span>
+            <span className="tag app-tag">Arts</span>
           </div>
         </div>
 

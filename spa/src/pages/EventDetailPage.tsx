@@ -22,7 +22,7 @@ export function EventDetailPage({ session }: EventDetailPageProps) {
             <Link className="button is-primary" to="/credits">
               Buy More Credits
             </Link>
-            <button className="button is-dark is-outlined" type="button">
+            <button className="button is-link is-light" type="button">
               Purchase Ticket
             </button>
           </div>
