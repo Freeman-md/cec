@@ -66,7 +66,7 @@ function OrganizerEventsView({ events }: { events: OrganizerEvent[] }) {
 type OrganizerCreateViewProps = {
   session: OrganizerStudioPageProps["session"];
   events: OrganizerEvent[];
-  refreshEvents: () => Promise<void>;
+  refreshEvents: () => Promise<OrganizerEvent[]>;
 };
 
 function OrganizerCreateView({ session, events, refreshEvents }: OrganizerCreateViewProps) {
@@ -100,6 +100,7 @@ function OrganizerCreateView({ session, events, refreshEvents }: OrganizerCreate
     () => events.find((eventItem) => eventItem.eventId === selectedEventId) ?? null,
     [events, selectedEventId],
   );
+  const selectedEventIsDraft = selectedEvent?.state === 0;
 
   async function withOrganizerSigner(
     action: (signer: Awaited<ReturnType<NonNullable<OrganizerStudioPageProps["session"]["provider"]>["getSigner"]>>) => Promise<void>,
@@ -134,11 +135,15 @@ function OrganizerCreateView({ session, events, refreshEvents }: OrganizerCreate
         });
 
         const receipt = await tx.wait();
-        await refreshEvents();
+        const refreshedEvents = await refreshEvents();
         await session.refreshSession();
 
         setEventStatus(receipt?.status === 1 ? "success" : "failed");
         setEventMessage(receipt?.status === 1 ? "Event created successfully." : "Event creation returned a failed receipt.");
+        if (receipt?.status === 1) {
+          const newestEvent = [...refreshedEvents].sort((left, right) => right.eventId - left.eventId)[0];
+          setSelectedEventId(newestEvent?.eventId ?? null);
+        }
         session.setLatestTransaction({
           hash: tx.hash,
           receiptStatus: receipt?.status === 1 ? "Confirmed" : "Failed",
@@ -164,6 +169,12 @@ function OrganizerCreateView({ session, events, refreshEvents }: OrganizerCreate
     if (!selectedEventId) {
       setTierStatus("failed");
       setTierMessage("Create or select an event before adding a tier.");
+      return;
+    }
+
+    if (!selectedEventIsDraft) {
+      setTierStatus("failed");
+      setTierMessage("Only draft events can be configured. Select a draft event or create a new one first.");
       return;
     }
 
@@ -245,6 +256,12 @@ function OrganizerCreateView({ session, events, refreshEvents }: OrganizerCreate
       return;
     }
 
+    if (!selectedEventIsDraft) {
+      setWalletCapStatus("failed");
+      setWalletCapMessage("Wallet cap can only be updated while the selected event is still in Draft.");
+      return;
+    }
+
     const parsedCap = Number(walletCap);
     if (!Number.isFinite(parsedCap) || parsedCap <= 0 || !Number.isInteger(parsedCap)) {
       setWalletCapStatus("failed");
@@ -300,6 +317,12 @@ function OrganizerCreateView({ session, events, refreshEvents }: OrganizerCreate
     if (!selectedEventId) {
       setSalesStatus("failed");
       setSalesMessage("Create or select an event before starting ticket sales.");
+      return;
+    }
+
+    if (!selectedEventIsDraft) {
+      setSalesStatus("failed");
+      setSalesMessage("Ticket sales can only be started from the Draft state.");
       return;
     }
 
@@ -371,6 +394,9 @@ function OrganizerCreateView({ session, events, refreshEvents }: OrganizerCreate
           <p className="meta-line mb-4">
             {selectedEvent ? `${eventStateLabel(selectedEvent.state)} · Wallet cap ${selectedEvent.walletCap} · ${selectedEvent.nextTierId} tier(s)` : "Create an event to start configuring it."}
           </p>
+          {!selectedEventIsDraft && selectedEvent ? (
+            <p className="help is-warning mb-4">This event is no longer in Draft, so tier and wallet-cap changes are disabled.</p>
+          ) : null}
 
           <div className="field">
             <label className="label" htmlFor="selected-event">
@@ -444,7 +470,12 @@ function OrganizerCreateView({ session, events, refreshEvents }: OrganizerCreate
             </div>
           </div>
 
-          <button className="button is-primary is-fullwidth" type="button" onClick={handleCreateTier} disabled={tierStatus === "pending"}>
+          <button
+            className="button is-primary is-fullwidth"
+            type="button"
+            onClick={handleCreateTier}
+            disabled={tierStatus === "pending" || !selectedEventIsDraft}
+          >
             {tierStatus === "pending" ? "Creating Tier..." : "Create Ticket Tier"}
           </button>
           {tierMessage ? (
@@ -477,7 +508,7 @@ function OrganizerCreateView({ session, events, refreshEvents }: OrganizerCreate
             className="button is-light is-fullwidth"
             type="button"
             onClick={handleWalletCapUpdate}
-            disabled={walletCapStatus === "pending"}
+            disabled={walletCapStatus === "pending" || !selectedEventIsDraft}
           >
             {walletCapStatus === "pending" ? "Updating Cap..." : "Update Wallet Cap"}
           </button>
@@ -489,7 +520,7 @@ function OrganizerCreateView({ session, events, refreshEvents }: OrganizerCreate
             className="button is-primary is-fullwidth mt-5"
             type="button"
             onClick={handleStartSales}
-            disabled={salesStatus === "pending"}
+            disabled={salesStatus === "pending" || !selectedEventIsDraft}
           >
             {salesStatus === "pending" ? "Starting Sales..." : "Start Ticket Sales"}
           </button>
@@ -515,11 +546,12 @@ export function OrganizerStudioPage({ session }: OrganizerStudioPageProps) {
   async function refreshEvents() {
     if (!session.provider || !session.account || !session.isCorrectNetwork) {
       setEvents([]);
-      return;
+      return [];
     }
 
     const organizerEvents = await readOrganizerEvents(session.provider, session.account);
     setEvents(organizerEvents);
+    return organizerEvents;
   }
 
   useEffect(() => {
