@@ -190,3 +190,43 @@ export async function readOwnedTickets(provider: BrowserProvider, account: strin
     return [];
   }
 }
+
+export async function readOrganizerEvents(provider: BrowserProvider, organizer: string) {
+  const { eventPlatform } = getAppContracts(provider);
+
+  try {
+    const nextEventId = Number(await eventPlatform.nextEventId());
+    const ownedEvents: Array<{
+      eventId: number;
+      state: number;
+      walletCap: number;
+      nextTierId: number;
+    }> = [];
+
+    for (let eventId = 1; eventId < nextEventId; eventId += 1) {
+      try {
+        const [eventData, nextTierId] = await Promise.all([
+          eventPlatform.events(eventId),
+          eventPlatform.nextTierIdByEvent(eventId),
+        ]);
+
+        if (String(eventData.organizer).toLowerCase() !== organizer.toLowerCase()) {
+          continue;
+        }
+
+        ownedEvents.push({
+          eventId,
+          state: Number(eventData.state),
+          walletCap: Number(eventData.walletCap),
+          nextTierId: Number(nextTierId),
+        });
+      } catch {
+        continue;
+      }
+    }
+
+    return ownedEvents;
+  } catch {
+    return [];
+  }
+}

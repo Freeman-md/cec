@@ -162,7 +162,7 @@ export function AdminConsolePage({ session }: AdminConsolePageProps) {
 
       const signer = await session.provider.getSigner();
       const { eventPlatform } = getAppContracts(signer);
-      const tx = await eventPlatform.setEthToCreditsRate(BigInt(parsedRate));
+      const tx = await eventPlatform.updateEthToCreditsRate(BigInt(parsedRate));
 
       session.setLatestTransaction({
         hash: tx.hash,
