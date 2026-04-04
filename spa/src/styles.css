@@ -146,6 +146,11 @@ body {
   gap: 1.5rem;
 }
 
+.discover-page {
+  display: grid;
+  gap: 2rem;
+}
+
 .surface-card {
   background: linear-gradient(180deg, rgba(29, 31, 41, 0.92) 0%, rgba(25, 27, 36, 0.96) 100%);
   border-radius: 28px;
@@ -191,8 +196,299 @@ code {
   flex-shrink: 0;
 }
 
+.discover-hero {
+  align-items: stretch;
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
+  overflow: hidden;
+  padding: 2.4rem;
+  position: relative;
+}
+
+.discover-hero::before {
+  content: "";
+  inset: 0;
+  position: absolute;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(0, 212, 255, 0.12), transparent 26%),
+    linear-gradient(120deg, rgba(112, 0, 255, 0.12), transparent 45%);
+  pointer-events: none;
+}
+
+.discover-hero__content,
+.discover-hero__visual {
+  position: relative;
+  z-index: 1;
+}
+
+.discover-hero__content {
+  display: grid;
+  gap: 1rem;
+  padding-right: 1rem;
+}
+
+.discover-hero__title {
+  color: var(--nc-on-surface);
+  font-family: "Manrope", "Inter", "Segoe UI", sans-serif;
+  font-size: clamp(3rem, 6vw, 5.4rem);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 0.96;
+  margin: 0;
+}
+
+.discover-hero__title-emphasis {
+  color: var(--nc-primary-strong);
+  display: block;
+  text-shadow: 0 0 24px rgba(0, 212, 255, 0.18);
+}
+
+.discover-hero__summary {
+  color: var(--nc-on-surface-variant);
+  font-size: 1rem;
+  line-height: 1.7;
+  max-width: 580px;
+  margin: 0;
+}
+
+.discover-hero__caption {
+  color: rgba(187, 201, 207, 0.82);
+  font-size: 0.82rem;
+  margin: 0;
+}
+
+.discover-hero__button {
+  border: 0;
+  border-radius: 16px !important;
+  font-weight: 700;
+  min-height: 3.2rem;
+  padding-inline: 1.15rem;
+}
+
+.discover-hero__button.is-primary {
+  background: linear-gradient(135deg, var(--nc-primary) 0%, var(--nc-primary-strong) 100%);
+  color: #072538 !important;
+}
+
+.discover-hero__button--secondary {
+  background: rgba(255, 255, 255, 0.02) !important;
+  border: 1px solid var(--nc-outline-ghost) !important;
+  color: var(--nc-on-surface) !important;
+}
+
+.discover-hero__visual {
+  border-radius: 26px;
+  min-height: 420px;
+  overflow: hidden;
+  position: relative;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(0, 212, 255, 0.2), transparent 25%),
+    radial-gradient(circle at 60% 24%, rgba(112, 0, 255, 0.22), transparent 24%),
+    linear-gradient(180deg, rgba(7, 10, 17, 0.75) 0%, rgba(10, 14, 24, 0.96) 100%);
+}
+
+.discover-hero__orb,
+.discover-hero__beam {
+  position: absolute;
+}
+
+.discover-hero__orb {
+  border-radius: 999px;
+  filter: blur(18px);
+}
+
+.discover-hero__orb--primary {
+  background: rgba(0, 212, 255, 0.28);
+  height: 220px;
+  right: 8%;
+  top: 14%;
+  width: 220px;
+}
+
+.discover-hero__orb--secondary {
+  background: rgba(112, 0, 255, 0.26);
+  bottom: 10%;
+  height: 240px;
+  left: 12%;
+  width: 240px;
+}
+
+.discover-hero__beam {
+  border-radius: 999px;
+  box-shadow: 0 0 22px currentColor;
+  height: 2px;
+  opacity: 0.9;
+  transform-origin: left center;
+}
+
+.discover-hero__beam--one {
+  color: rgba(0, 212, 255, 0.85);
+  left: 2%;
+  top: 22%;
+  transform: rotate(20deg);
+  width: 110%;
+}
+
+.discover-hero__beam--two {
+  color: rgba(112, 0, 255, 0.82);
+  left: 10%;
+  top: 55%;
+  transform: rotate(-22deg);
+  width: 95%;
+}
+
+.discover-hero__beam--three {
+  color: rgba(168, 232, 255, 0.8);
+  left: -4%;
+  top: 70%;
+  transform: rotate(8deg);
+  width: 108%;
+}
+
 .button-row {
   flex-wrap: wrap;
+}
+
+.discover-section {
+  display: grid;
+  gap: 1.2rem;
+}
+
+.discover-section__heading {
+  margin-bottom: 0;
+}
+
+.discover-section__link {
+  color: var(--nc-primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.discover-category-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.discover-category-tabs__item {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--nc-outline-ghost);
+  border-radius: 999px;
+  color: var(--nc-on-surface-variant);
+  cursor: pointer;
+  font-weight: 600;
+  padding: 0.7rem 1rem;
+}
+
+.discover-category-tabs__item--active {
+  background: linear-gradient(135deg, rgba(168, 232, 255, 0.2), rgba(0, 212, 255, 0.18));
+  color: var(--nc-on-surface);
+}
+
+.discover-page__grid {
+  gap: 1.2rem;
+}
+
+.discover-event-card {
+  background: linear-gradient(180deg, rgba(23, 26, 36, 0.96) 0%, rgba(16, 18, 27, 0.98) 100%);
+  border-radius: 24px;
+  box-shadow: var(--nc-shadow-ambient);
+  display: grid;
+  gap: 0.9rem;
+  overflow: hidden;
+  padding: 0.9rem;
+}
+
+.discover-event-card__image {
+  align-items: flex-start;
+  aspect-ratio: 16 / 11;
+  border-radius: 18px;
+  display: flex;
+  justify-content: flex-end;
+  padding: 0.9rem;
+}
+
+.discover-event-card__image--music {
+  background:
+    radial-gradient(circle at 52% 18%, rgba(0, 212, 255, 0.32), transparent 30%),
+    linear-gradient(145deg, rgba(16, 21, 34, 0.6), rgba(4, 7, 13, 0.95)),
+    linear-gradient(180deg, rgba(148, 0, 211, 0.14), rgba(0, 212, 255, 0.08));
+}
+
+.discover-event-card__image--workshop {
+  background:
+    radial-gradient(circle at 28% 32%, rgba(255, 214, 140, 0.24), transparent 24%),
+    linear-gradient(145deg, rgba(38, 28, 18, 0.52), rgba(16, 14, 10, 0.9)),
+    linear-gradient(180deg, rgba(255, 224, 176, 0.1), rgba(0, 212, 255, 0.05));
+}
+
+.discover-event-card__image--sports {
+  background:
+    radial-gradient(circle at 72% 30%, rgba(120, 215, 255, 0.2), transparent 26%),
+    linear-gradient(145deg, rgba(15, 23, 32, 0.62), rgba(7, 11, 18, 0.95)),
+    linear-gradient(180deg, rgba(0, 212, 255, 0.08), rgba(25, 144, 255, 0.06));
+}
+
+.discover-event-card__body {
+  padding: 0.1rem 0.35rem 0.45rem;
+}
+
+.discover-event-card__header {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.discover-event-card__price {
+  background: rgba(12, 14, 23, 0.7);
+  color: var(--nc-on-surface);
+}
+
+.discover-event-card__footer {
+  align-items: center;
+  justify-content: space-between;
+}
+
+.discover-event-card__link {
+  color: var(--nc-primary);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.discover-credits-banner {
+  align-items: center;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(0, 1fr) 320px;
+}
+
+.discover-credits-banner__panel {
+  background:
+    radial-gradient(circle at top right, rgba(0, 212, 255, 0.16), transparent 34%),
+    linear-gradient(180deg, rgba(16, 19, 29, 0.96) 0%, rgba(11, 13, 21, 0.98) 100%);
+  border-radius: 22px;
+  display: grid;
+  gap: 1rem;
+  padding: 1.2rem;
+}
+
+.discover-credits-banner__balance {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.discover-credits-banner__balance strong {
+  color: var(--nc-on-surface);
+  font-family: "Manrope", "Inter", "Segoe UI", sans-serif;
+  font-size: 1.9rem;
+}
+
+.discover-credits-banner__button {
+  border-radius: 16px !important;
+  justify-content: center;
+  min-height: 3.2rem;
 }
 
 .section-heading {
@@ -355,6 +651,8 @@ code {
   .card-grid--two,
   .card-grid--three,
   .page-with-sidebar,
+  .discover-hero,
+  .discover-credits-banner,
   .app-footer {
     grid-template-columns: 1fr;
     flex-direction: column;
@@ -368,5 +666,9 @@ code {
 
   .role-sidebar {
     position: static;
+  }
+
+  .discover-hero__visual {
+    min-height: 300px;
   }
 }
