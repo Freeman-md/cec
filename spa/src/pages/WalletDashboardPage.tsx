@@ -1,20 +1,9 @@
 import { PageIntro } from "../components/PageIntro";
 import { TransactionEvidenceCard } from "../components/TransactionEvidenceCard";
-import type { AppRole } from "../types/app";
+import type { AppSession } from "../types/app";
 
 type WalletDashboardPageProps = {
-  session: {
-    role: AppRole;
-    identity: {
-      account: string;
-      label: string;
-    };
-    chainLabel: string;
-    creditsBalance: string;
-    isConnected: boolean;
-    isCorrectNetwork: boolean;
-    latestTransaction: import("../types/app").TransactionEvidence | null;
-  };
+  session: AppSession;
 };
 
 export function WalletDashboardPage({ session }: WalletDashboardPageProps) {

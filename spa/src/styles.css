@@ -55,10 +55,6 @@ body {
   background: #f5f7fb;
 }
 
-.app-shell__background {
-  display: none;
-}
-
 .app-shell__content {
   min-height: 100vh;
 }

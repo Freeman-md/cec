@@ -9,7 +9,6 @@ type PageFrameProps = {
 export function PageFrame({ header, children, footer }: PageFrameProps) {
   return (
     <main className="app-shell">
-      <div className="app-shell__background" />
       <div className="app-shell__content">
         {header}
         <div className="page-container">{children}</div>

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { detectRole, getExpectedChainId, getExpectedChainLabel, readCreditsBalance } from "../lib/contracts";
 import { useWallet } from "./useWallet";
-import type { AppRole, SessionIdentity, TransactionEvidence } from "../types/app";
+import type { AppRole, AppSession, SessionIdentity, TransactionEvidence } from "../types/app";
 
 function formatConnectedIdentity(role: AppRole, account: string): SessionIdentity {
   const roleLabels: Record<AppRole, string> = {
@@ -18,12 +18,14 @@ function formatConnectedIdentity(role: AppRole, account: string): SessionIdentit
 
 export function useAppSession() {
   const wallet = useWallet();
+  const expectedChainId = getExpectedChainId();
+  const expectedChainLabel = getExpectedChainLabel();
   const [detectedRole, setDetectedRole] = useState<AppRole>("student");
   const [creditsBalance, setCreditsBalance] = useState("0");
   const [latestTransaction, setLatestTransaction] = useState<TransactionEvidence | null>(null);
 
   const refreshSession = useCallback(async () => {
-    if (!wallet.provider || !wallet.account || wallet.chainId !== getExpectedChainId()) {
+    if (!wallet.provider || !wallet.account || wallet.chainId !== expectedChainId) {
       setDetectedRole("student");
       setCreditsBalance("0");
       return;
@@ -36,7 +38,7 @@ export function useAppSession() {
 
     setDetectedRole(role);
     setCreditsBalance(balance);
-  }, [wallet.account, wallet.chainId, wallet.provider]);
+  }, [expectedChainId, wallet.account, wallet.chainId, wallet.provider]);
 
   useEffect(() => {
     void refreshSession();
@@ -50,13 +52,13 @@ export function useAppSession() {
         label: "Wallet not connected",
       } satisfies SessionIdentity);
   const chainLabel =
-    wallet.chainId === getExpectedChainId()
-      ? getExpectedChainLabel()
+    wallet.chainId === expectedChainId
+      ? expectedChainLabel
       : wallet.chainId
         ? `Wrong network · ${wallet.chainId}`
-        : getExpectedChainLabel();
+        : expectedChainLabel;
 
-  return useMemo(
+  return useMemo<AppSession>(
     () => ({
       role,
       identity,
@@ -69,7 +71,7 @@ export function useAppSession() {
       hasWallet: wallet.hasWallet,
       account: wallet.account,
       chainId: wallet.chainId,
-      isCorrectNetwork: wallet.chainId === getExpectedChainId(),
+      isCorrectNetwork: wallet.chainId === expectedChainId,
       error: wallet.error,
       provider: wallet.provider,
       latestTransaction,
@@ -87,6 +89,7 @@ export function useAppSession() {
       wallet.hasWallet,
       wallet.account,
       wallet.chainId,
+      expectedChainId,
       wallet.error,
       wallet.provider,
       latestTransaction,

@@ -12,7 +12,6 @@ import { WalletDashboardPage } from "./pages/WalletDashboardPage";
 
 export function App() {
   const session = useAppSession();
-  const footerNavClassName = ({ isActive }: { isActive: boolean }) => (isActive ? "active" : undefined);
 
   return (
     <BrowserRouter>
@@ -25,13 +24,13 @@ export function App() {
               <p className="footer-copy">Campus event ticketing dApp powered by CEC credits and NFT ticket ownership.</p>
             </div>
             <div className="footer-links">
-              <NavLink to="/" className={footerNavClassName}>
+              <NavLink to="/" className={({ isActive }) => (isActive ? "active" : undefined)}>
                 Discover
               </NavLink>
-              <NavLink to="/my-tickets" className={footerNavClassName}>
+              <NavLink to="/my-tickets" className={({ isActive }) => (isActive ? "active" : undefined)}>
                 My Tickets
               </NavLink>
-              <NavLink to="/wallet" className={footerNavClassName}>
+              <NavLink to="/wallet" className={({ isActive }) => (isActive ? "active" : undefined)}>
                 Wallet
               </NavLink>
             </div>

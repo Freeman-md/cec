@@ -3,16 +3,10 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getEventContentByEventId, getEventRouteKey } from "../data/demoEvents";
 import { readAllEvents } from "../lib/contracts";
-import type { AppRole } from "../types/app";
+import type { AppSession } from "../types/app";
 
 type DiscoverPageProps = {
-  session: {
-    role: AppRole;
-    provider: Awaited<ReturnType<typeof import("../lib/ethereum").createBrowserProvider>>;
-    isConnected: boolean;
-    isCorrectNetwork: boolean;
-    creditsBalance: string;
-  };
+  session: AppSession;
 };
 
 function formatCec(value: string) {

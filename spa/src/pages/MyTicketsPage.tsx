@@ -1,17 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { PageIntro } from "../components/PageIntro";
 import { getEventContentByEventId } from "../data/demoEvents";
 import { readOwnedTickets } from "../lib/contracts";
-import type { AppRole } from "../types/app";
+import type { AppSession } from "../types/app";
 
 type MyTicketsPageProps = {
-  session: {
-    role: AppRole;
-    provider: Awaited<ReturnType<typeof import("../lib/ethereum").createBrowserProvider>>;
-    account: string | null;
-    isConnected: boolean;
-    isCorrectNetwork: boolean;
-  };
+  session: Pick<AppSession, "provider" | "account" | "isConnected" | "isCorrectNetwork">;
 };
 
 type OwnedTicketView = {
@@ -72,8 +66,6 @@ export function MyTicketsPage({ session }: MyTicketsPageProps) {
     void hydrateTickets();
   }, [session.account, session.isConnected, session.isCorrectNetwork, session.provider]);
 
-  const hasTickets = useMemo(() => tickets.length > 0, [tickets]);
-
   return (
     <div className="page-stack">
       <PageIntro
@@ -105,7 +97,7 @@ export function MyTicketsPage({ session }: MyTicketsPageProps) {
             <h3 className="title is-5">Switch to the local Hardhat network</h3>
             <p className="meta-line">Ticket ownership is only loaded from the configured localhost deployment.</p>
           </div>
-        ) : !hasTickets ? (
+        ) : tickets.length === 0 ? (
           <div className="simple-panel">
             <h3 className="title is-5">No tickets owned yet</h3>
             <p className="meta-line">Buy credits, purchase a tier on the event page, then return here to verify NFT ownership.</p>

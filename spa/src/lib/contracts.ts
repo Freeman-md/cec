@@ -11,12 +11,6 @@ type ContractInfo = typeof contractInfo & {
   creditsToken: ContractConfig;
   eventPlatform: ContractConfig;
   ticketNFT?: ContractConfig;
-  demoData?: {
-    organizerAddress: string;
-    featuredEventId: number;
-    featuredEventSlug: string;
-    tierIds: number[];
-  };
 };
 
 const appContracts = contractInfo as ContractInfo;
@@ -39,17 +33,6 @@ export function getExpectedChainId() {
 
 export function getExpectedChainLabel() {
   return `${appContracts.networkName} · ${appContracts.chainId}`;
-}
-
-export function getDemoData() {
-  return (
-    appContracts.demoData ?? {
-      organizerAddress: "0x0000000000000000000000000000000000000000",
-      featuredEventId: 1,
-      featuredEventSlug: "campus-beats-2024",
-      tierIds: [1, 2],
-    }
-  );
 }
 
 export async function detectRole(provider: BrowserProvider, account: string): Promise<AppRole> {
@@ -89,7 +72,33 @@ export async function readExchangeRate(provider: BrowserProvider) {
   }
 }
 
-export async function readEventDetail(provider: BrowserProvider, eventId: number) {
+type EventTierDetail = {
+  tierId: number;
+  label: string;
+  priceInCredits: bigint;
+  maxSupply: number;
+  soldCount: number;
+};
+
+type EventDetail = {
+  eventId: number;
+  organizer: string;
+  eventState: number;
+  walletCap: number;
+  tiers: EventTierDetail[];
+};
+
+function emptyEventDetail(eventId: number): EventDetail {
+  return {
+    eventId,
+    organizer: "0x0000000000000000000000000000000000000000",
+    eventState: 0,
+    walletCap: 0,
+    tiers: [],
+  };
+}
+
+export async function readEventDetail(provider: BrowserProvider, eventId: number): Promise<EventDetail> {
   const { eventPlatform } = getAppContracts(provider);
 
   try {
@@ -115,19 +124,7 @@ export async function readEventDetail(provider: BrowserProvider, eventId: number
       })),
     };
   } catch {
-    return {
-      eventId,
-      organizer: "0x0000000000000000000000000000000000000000",
-      eventState: 0,
-      walletCap: 0,
-      tiers: [] as Array<{
-        tierId: number;
-        label: string;
-        priceInCredits: bigint;
-        maxSupply: number;
-        soldCount: number;
-      }>,
-    };
+    return emptyEventDetail(eventId);
   }
 }
 
@@ -139,41 +136,6 @@ export async function readCreditsAllowance(provider: BrowserProvider, owner: str
     return allowance as bigint;
   } catch {
     return 0n;
-  }
-}
-
-export async function readEventSnapshot(provider: BrowserProvider, eventId: number, tierIds: number[]) {
-  const { eventPlatform } = getAppContracts(provider);
-
-  try {
-    const [eventData, tiers] = await Promise.all([
-      eventPlatform.events(eventId),
-      Promise.all(tierIds.map((tierId) => eventPlatform.ticketTiers(eventId, tierId))),
-    ]);
-
-    return {
-      eventState: Number(eventData.state),
-      walletCap: Number(eventData.walletCap),
-      tiers: tiers.map((tier, index) => ({
-        tierId: tierIds[index],
-        label: String(tier.label),
-        priceInCredits: tier.priceInCredits as bigint,
-        maxSupply: Number(tier.maxSupply),
-        soldCount: Number(tier.soldCount),
-      })),
-    };
-  } catch {
-    return {
-      eventState: 0,
-      walletCap: 0,
-      tiers: tierIds.map((tierId) => ({
-        tierId,
-        label: "Unavailable",
-        priceInCredits: 0n,
-        maxSupply: 0,
-        soldCount: 0,
-      })),
-    };
   }
 }
 

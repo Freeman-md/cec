@@ -3,21 +3,10 @@ import { useEffect, useMemo, useState } from "react";
 import { PageIntro } from "../components/PageIntro";
 import { TransactionEvidenceCard } from "../components/TransactionEvidenceCard";
 import { getAppContracts, readCreditsBalance, readExchangeRate } from "../lib/contracts";
-import type { AppRole } from "../types/app";
+import type { AppSession } from "../types/app";
 
 type CreditsPurchasePageProps = {
-  session: {
-    role: AppRole;
-    provider: Awaited<ReturnType<typeof import("../lib/ethereum").createBrowserProvider>>;
-    account: string | null;
-    isConnected: boolean;
-    isCorrectNetwork: boolean;
-    creditsBalance: string;
-    refreshSession: () => Promise<void>;
-    connectWallet: () => void;
-    latestTransaction: import("../types/app").TransactionEvidence | null;
-    setLatestTransaction: (evidence: import("../types/app").TransactionEvidence | null) => void;
-  };
+  session: AppSession;
 };
 
 type TransactionStatus = "idle" | "pending" | "success" | "failed";
@@ -41,10 +30,6 @@ export function CreditsPurchasePage({ session }: CreditsPurchasePageProps) {
   const [ethBalance, setEthBalance] = useState("0");
   const [status, setStatus] = useState<TransactionStatus>("idle");
   const [errorMessage, setErrorMessage] = useState("");
-  const [beforeCreditsBalance, setBeforeCreditsBalance] = useState("0");
-  const [afterCreditsBalance, setAfterCreditsBalance] = useState("0");
-  const [beforeEthBalance, setBeforeEthBalance] = useState("0");
-  const [afterEthBalance, setAfterEthBalance] = useState("0");
 
   useEffect(() => {
     async function hydratePurchasePage() {
@@ -127,8 +112,6 @@ export function CreditsPurchasePage({ session }: CreditsPurchasePageProps) {
       setErrorMessage("");
       const startingCreditsBalance = session.creditsBalance;
       const startingEthBalance = ethBalance;
-      setBeforeCreditsBalance(startingCreditsBalance);
-      setBeforeEthBalance(startingEthBalance);
 
       const signer = await session.provider.getSigner();
       const { eventPlatform } = getAppContracts(signer);
@@ -151,8 +134,6 @@ export function CreditsPurchasePage({ session }: CreditsPurchasePageProps) {
       ]);
       const refreshedEthBalanceDisplay = formatEther(refreshedEthBalance);
 
-      setAfterCreditsBalance(refreshedCreditsBalance);
-      setAfterEthBalance(refreshedEthBalanceDisplay);
       setEthBalance(refreshedEthBalanceDisplay);
       setStatus("success");
       session.setLatestTransaction({
@@ -179,15 +160,6 @@ export function CreditsPurchasePage({ session }: CreditsPurchasePageProps) {
       });
     }
   }
-
-  const statusClassName =
-    status === "success"
-      ? "status-pill status-pill--success"
-      : status === "failed"
-        ? "status-pill status-pill--error"
-        : status === "pending"
-          ? "status-pill status-pill--info"
-          : "status-pill status-pill--used";
 
   return (
     <div className="page-stack">

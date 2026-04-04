@@ -5,20 +5,10 @@ import { PageIntro } from "../components/PageIntro";
 import { TransactionEvidenceCard } from "../components/TransactionEvidenceCard";
 import { RoleGuard } from "../components/RoleGuard";
 import { getAppContracts, readOrganizerEvents } from "../lib/contracts";
-import type { AppRole } from "../types/app";
+import type { AppSession } from "../types/app";
 
 type OrganizerStudioPageProps = {
-  session: {
-    role: AppRole;
-    provider: Awaited<ReturnType<typeof import("../lib/ethereum").createBrowserProvider>>;
-    account: string | null;
-    isConnected: boolean;
-    isCorrectNetwork: boolean;
-    refreshSession: () => Promise<void>;
-    connectWallet: () => void;
-    latestTransaction: import("../types/app").TransactionEvidence | null;
-    setLatestTransaction: (evidence: import("../types/app").TransactionEvidence | null) => void;
-  };
+  session: AppSession;
 };
 
 type OrganizerEvent = {

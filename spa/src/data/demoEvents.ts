@@ -65,13 +65,3 @@ export function getEventContentByEventId(eventId: number) {
   const matchedEntry = Object.values(demoEvents).find((eventContent) => eventContent.eventId === eventId);
   return matchedEntry ?? buildFallbackEvent(eventId);
 }
-
-export function getEventContentByRouteKey(routeKey: string) {
-  const matchedEntry = demoEvents[routeKey as DemoEventSlug];
-  if (matchedEntry) {
-    return matchedEntry;
-  }
-
-  const eventId = getEventIdFromRouteKey(routeKey);
-  return buildFallbackEvent(eventId ?? 0);
-}

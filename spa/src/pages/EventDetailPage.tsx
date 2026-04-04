@@ -3,27 +3,11 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { PageIntro } from "../components/PageIntro";
 import { getEventContentByEventId, getEventIdFromRouteKey } from "../data/demoEvents";
-import {
-  getAppContracts,
-  readCreditsAllowance,
-  readEventDetail,
-  readWalletPurchases,
-} from "../lib/contracts";
-import type { AppRole } from "../types/app";
+import { getAppContracts, readCreditsAllowance, readEventDetail, readWalletPurchases } from "../lib/contracts";
+import type { AppSession } from "../types/app";
 
 type EventDetailPageProps = {
-  session: {
-    role: AppRole;
-    provider: Awaited<ReturnType<typeof import("../lib/ethereum").createBrowserProvider>>;
-    account: string | null;
-    isConnected: boolean;
-    isCorrectNetwork: boolean;
-    creditsBalance: string;
-    refreshSession: () => Promise<void>;
-    connectWallet: () => void;
-    latestTransaction: import("../types/app").TransactionEvidence | null;
-    setLatestTransaction: (evidence: import("../types/app").TransactionEvidence | null) => void;
-  };
+  session: AppSession;
 };
 
 type TierView = {
@@ -36,6 +20,28 @@ type TierView = {
 };
 
 type ActionStatus = "idle" | "pending" | "success" | "failed";
+
+function mapTierView(tier: {
+  tierId: number;
+  label: string;
+  priceInCredits: bigint;
+  maxSupply: number;
+  soldCount: number;
+}): TierView {
+  return {
+    tierId: tier.tierId,
+    label: tier.label,
+    priceLabel: `${formatCec(formatUnits(tier.priceInCredits, 18))} CEC`,
+    stockLabel:
+      tier.maxSupply === 0
+        ? "Unavailable"
+        : tier.soldCount >= tier.maxSupply
+          ? "Sold out"
+          : `${tier.maxSupply - tier.soldCount} left`,
+    isSoldOut: tier.maxSupply === 0 || tier.soldCount >= tier.maxSupply,
+    priceInCredits: tier.priceInCredits,
+  };
+}
 
 function eventStateLabel(eventState: number) {
   switch (eventState) {
@@ -98,19 +104,7 @@ export function EventDetailPage({ session }: EventDetailPageProps) {
         readCreditsAllowance(session.provider, session.account),
       ]);
 
-      const mappedTiers = snapshot.tiers.map((tier) => ({
-        tierId: tier.tierId,
-        label: tier.label,
-        priceLabel: `${formatCec(formatUnits(tier.priceInCredits, 18))} CEC`,
-        stockLabel:
-          tier.maxSupply === 0
-            ? "Unavailable"
-            : tier.soldCount >= tier.maxSupply
-              ? "Sold out"
-              : `${tier.maxSupply - tier.soldCount} left`,
-        isSoldOut: tier.maxSupply === 0 || tier.soldCount >= tier.maxSupply,
-        priceInCredits: tier.priceInCredits,
-      }));
+      const mappedTiers = snapshot.tiers.map(mapTierView);
 
       setTiers(mappedTiers);
       setSelectedTierId((currentSelected) => currentSelected ?? mappedTiers.find((tier) => !tier.isSoldOut)?.tierId ?? null);
@@ -156,21 +150,7 @@ export function EventDetailPage({ session }: EventDetailPageProps) {
       readCreditsAllowance(session.provider, session.account),
     ]);
 
-    setTiers(
-      snapshot.tiers.map((tier) => ({
-        tierId: tier.tierId,
-        label: tier.label,
-        priceLabel: `${formatCec(formatUnits(tier.priceInCredits, 18))} CEC`,
-        stockLabel:
-          tier.maxSupply === 0
-            ? "Unavailable"
-            : tier.soldCount >= tier.maxSupply
-              ? "Sold out"
-              : `${tier.maxSupply - tier.soldCount} left`,
-        isSoldOut: tier.maxSupply === 0 || tier.soldCount >= tier.maxSupply,
-        priceInCredits: tier.priceInCredits,
-      })),
-    );
+    setTiers(snapshot.tiers.map(mapTierView));
     setEventState(snapshot.eventState);
     setWalletCap(snapshot.walletCap);
     setWalletPurchasesCount(purchaseCount);

@@ -1,21 +1,8 @@
 import { NavLink } from "react-router-dom";
-import type { AppRole } from "../types/app";
+import type { AppSession } from "../types/app";
 
 type AppHeaderProps = {
-  session: {
-    role: AppRole;
-    identity: {
-      account: string;
-      label: string;
-    };
-    chainLabel: string;
-    creditsBalance: string;
-    connectWallet: () => void;
-    isConnected: boolean;
-    isConnecting: boolean;
-    hasWallet: boolean;
-    isCorrectNetwork: boolean;
-  };
+  session: AppSession;
 };
 
 export function AppHeader({ session }: AppHeaderProps) {

@@ -47,12 +47,6 @@ async function main() {
       address: await ticketNFT.getAddress(),
       abi: JSON.parse(ticketNFT.interface.formatJson()),
     },
-    demoData: {
-      organizerAddress: organizer.address,
-      featuredEventId: 1,
-      featuredEventSlug: "campus-beats-2024",
-      tierIds: [1, 2],
-    },
   };
 
   const outputPath = path.resolve(process.cwd(), "spa", "src", "config", "contract-info.json");

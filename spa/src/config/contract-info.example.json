@@ -12,11 +12,5 @@
   "ticketNFT": {
     "address": "0x0000000000000000000000000000000000000000",
     "abi": []
-  },
-  "demoData": {
-    "organizerAddress": "0x0000000000000000000000000000000000000000",
-    "featuredEventId": 1,
-    "featuredEventSlug": "campus-beats-2024",
-    "tierIds": [1, 2]
   }
 }
