@@ -59,3 +59,13 @@ export async function readCreditsBalance(provider: BrowserProvider, account: str
     return "0";
   }
 }
+
+export async function readExchangeRate(provider: BrowserProvider) {
+  const { eventPlatform } = getAppContracts(provider);
+
+  try {
+    return BigInt(await eventPlatform.ethToCreditsRate());
+  } catch {
+    return 0n;
+  }
+}

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { detectRole, getExpectedChainId, getExpectedChainLabel, readCreditsBalance } from "../lib/contracts";
 import { useWallet } from "./useWallet";
 import type { AppRole, SessionIdentity } from "../types/app";
@@ -37,25 +37,25 @@ export function useAppSession() {
   const [detectedRole, setDetectedRole] = useState<AppRole>("student");
   const [creditsBalance, setCreditsBalance] = useState("0");
 
-  useEffect(() => {
-    async function hydrateSession() {
-      if (!wallet.provider || !wallet.account || wallet.chainId !== getExpectedChainId()) {
-        setDetectedRole("student");
-        setCreditsBalance("0");
-        return;
-      }
-
-      const [role, balance] = await Promise.all([
-        detectRole(wallet.provider, wallet.account),
-        readCreditsBalance(wallet.provider, wallet.account),
-      ]);
-
-      setDetectedRole(role);
-      setCreditsBalance(balance);
+  const refreshSession = useCallback(async () => {
+    if (!wallet.provider || !wallet.account || wallet.chainId !== getExpectedChainId()) {
+      setDetectedRole("student");
+      setCreditsBalance("0");
+      return;
     }
 
-    void hydrateSession();
+    const [role, balance] = await Promise.all([
+      detectRole(wallet.provider, wallet.account),
+      readCreditsBalance(wallet.provider, wallet.account),
+    ]);
+
+    setDetectedRole(role);
+    setCreditsBalance(balance);
   }, [wallet.account, wallet.chainId, wallet.provider]);
+
+  useEffect(() => {
+    void refreshSession();
+  }, [refreshSession]);
 
   const role = wallet.isConnected ? detectedRole : previewRole;
   const identity = wallet.account ? formatConnectedIdentity(role, wallet.account) : previewIdentities[previewRole];
@@ -72,6 +72,7 @@ export function useAppSession() {
       identity,
       chainLabel,
       creditsBalance,
+      refreshSession,
       setRole: setPreviewRole,
       connectWallet: wallet.connectWallet,
       isConnected: wallet.isConnected,
@@ -88,6 +89,7 @@ export function useAppSession() {
       identity,
       chainLabel,
       creditsBalance,
+      refreshSession,
       wallet.connectWallet,
       wallet.isConnected,
       wallet.isConnecting,
