@@ -1,19 +1,17 @@
 # CW2 SPA
 
-Minimal React + Bulma interface for the CW2 local Hardhat flow.
+Clean boilerplate for the final Phase 6 rebuild.
 
 ## Scope
 
-This SPA currently demonstrates one real on-chain action:
-- connect a wallet
-- call `buyCreditsWithEth()`
-- show before/after CEC balance
-- show transaction evidence:
-  - tx hash
-  - receipt status
-  - block number
-  - gas used
-  - emitted log count
+This folder is intentionally reset to a minimal starting point so the final UI can be rebuilt
+iteratively from the Stitch-approved design direction and the Phase 6 checklist.
+
+What remains in place:
+- the React + TypeScript + Bulma setup
+- the local deployment bridge at `scripts/deploy-spa-local.ts`
+- the generated contract metadata path:
+  - `src/config/contract-info.json`
 
 ## Local run order
 
@@ -39,5 +37,6 @@ npm run dev
 ## Notes
 
 - The deployment script writes `src/config/contract-info.json`.
-- MetaMask should be connected to the local Hardhat chain before using the SPA.
-- The current UI is intentionally limited to the ERC-20 exchange flow so the CW2 demo stays focused.
+- MetaMask should be connected to the local Hardhat chain before using the final rebuilt SPA.
+- Use the local implementation checklist in:
+  - `/Users/freemancodz/Desktop/Projects/Blockchain Development/implementation/deliverables/cw2/PHASE-6-SPA-FEATURE-CHECKLIST.md`

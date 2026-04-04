@@ -1,8 +1,9 @@
 :root {
-  color: #17212b;
+  color: #f5f7ff;
   background:
-    radial-gradient(circle at top right, rgba(55, 114, 255, 0.12), transparent 30%),
-    linear-gradient(180deg, #f6f9fc 0%, #eef4fb 100%);
+    radial-gradient(circle at top left, rgba(79, 209, 255, 0.12), transparent 26%),
+    radial-gradient(circle at top right, rgba(150, 91, 255, 0.18), transparent 24%),
+    linear-gradient(180deg, #0d111b 0%, #111727 100%);
 }
 
 html,
@@ -14,6 +15,7 @@ body,
 body {
   margin: 0;
   font-family: "Inter", "Segoe UI", sans-serif;
+  background: transparent;
 }
 
 .app-shell {
@@ -22,27 +24,36 @@ body {
 
 .hero-card,
 .panel-card {
-  border: 1px solid rgba(23, 33, 43, 0.08);
-  box-shadow: 0 18px 50px rgba(20, 40, 70, 0.08);
+  background: rgba(18, 24, 38, 0.82);
+  border: 1px solid rgba(137, 156, 194, 0.18);
+  border-radius: 28px;
+  box-shadow: 0 22px 64px rgba(5, 10, 20, 0.28);
+  padding: 2rem;
 }
 
-.hero-card {
-  background: linear-gradient(135deg, #ffffff 0%, #f5f9ff 100%);
-}
-
-.panel-card {
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(10px);
-}
-
-.mono-data {
-  font-family: "IBM Plex Mono", "SFMono-Regular", monospace;
-  word-break: break-all;
-}
-
-.subtle-label {
+.eyebrow {
+  color: #53d7ff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  margin-bottom: 0.9rem;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-size: 0.72rem;
-  color: #65748b;
+}
+
+.title,
+.subtitle,
+.content,
+li,
+code {
+  color: #f5f7ff !important;
+}
+
+.ordered-list {
+  padding-left: 1.25rem;
+}
+
+code {
+  background: rgba(120, 140, 190, 0.16);
+  border-radius: 8px;
+  padding: 0.12rem 0.35rem;
 }
