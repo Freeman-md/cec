@@ -2,12 +2,11 @@ import { formatUnits } from "ethers";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { PageIntro } from "../components/PageIntro";
-import { demoEvents, type DemoEventSlug } from "../data/demoEvents";
+import { getEventContentByEventId, getEventIdFromRouteKey } from "../data/demoEvents";
 import {
   getAppContracts,
-  getDemoData,
   readCreditsAllowance,
-  readEventSnapshot,
+  readEventDetail,
   readWalletPurchases,
 } from "../lib/contracts";
 import type { AppRole } from "../types/app";
@@ -38,8 +37,6 @@ type TierView = {
 
 type ActionStatus = "idle" | "pending" | "success" | "failed";
 
-const demoData = getDemoData();
-
 function eventStateLabel(eventState: number) {
   switch (eventState) {
     case 1:
@@ -69,9 +66,9 @@ function formatCec(balance: string) {
 }
 
 export function EventDetailPage({ session }: EventDetailPageProps) {
-  const { eventSlug = demoData.featuredEventSlug } = useParams();
-  const resolvedSlug = (eventSlug in demoEvents ? eventSlug : demoData.featuredEventSlug) as DemoEventSlug;
-  const content = demoEvents[resolvedSlug];
+  const { eventSlug = "event-1" } = useParams();
+  const eventId = getEventIdFromRouteKey(eventSlug) ?? 1;
+  const content = getEventContentByEventId(eventId);
 
   const [tiers, setTiers] = useState<TierView[]>([]);
   const [selectedTierId, setSelectedTierId] = useState<number | null>(null);
@@ -96,8 +93,8 @@ export function EventDetailPage({ session }: EventDetailPageProps) {
       }
 
       const [snapshot, purchaseCount, currentAllowance] = await Promise.all([
-        readEventSnapshot(session.provider, demoData.featuredEventId, demoData.tierIds),
-        readWalletPurchases(session.provider, demoData.featuredEventId, session.account),
+        readEventDetail(session.provider, eventId),
+        readWalletPurchases(session.provider, eventId, session.account),
         readCreditsAllowance(session.provider, session.account),
       ]);
 
@@ -124,7 +121,7 @@ export function EventDetailPage({ session }: EventDetailPageProps) {
     }
 
     void hydrateEventDetail();
-  }, [session.account, session.creditsBalance, session.isCorrectNetwork, session.provider]);
+  }, [eventId, session.account, session.creditsBalance, session.isCorrectNetwork, session.provider]);
 
   const selectedTier = useMemo(
     () => tiers.find((tier) => tier.tierId === selectedTierId) ?? null,
@@ -154,8 +151,8 @@ export function EventDetailPage({ session }: EventDetailPageProps) {
     }
 
     const [snapshot, purchaseCount, currentAllowance] = await Promise.all([
-      readEventSnapshot(session.provider, demoData.featuredEventId, demoData.tierIds),
-      readWalletPurchases(session.provider, demoData.featuredEventId, session.account),
+      readEventDetail(session.provider, eventId),
+      readWalletPurchases(session.provider, eventId, session.account),
       readCreditsAllowance(session.provider, session.account),
     ]);
 
@@ -239,7 +236,7 @@ export function EventDetailPage({ session }: EventDetailPageProps) {
 
       const signer = await session.provider.getSigner();
       const { eventPlatform } = getAppContracts(signer);
-      const tx = await eventPlatform.obtainTicketWithCredits(demoData.featuredEventId, selectedTier.tierId);
+      const tx = await eventPlatform.obtainTicketWithCredits(eventId, selectedTier.tierId);
       session.setLatestTransaction({
         hash: tx.hash,
         receiptStatus: "Pending",

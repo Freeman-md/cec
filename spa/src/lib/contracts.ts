@@ -89,6 +89,48 @@ export async function readExchangeRate(provider: BrowserProvider) {
   }
 }
 
+export async function readEventDetail(provider: BrowserProvider, eventId: number) {
+  const { eventPlatform } = getAppContracts(provider);
+
+  try {
+    const [eventData, nextTierId] = await Promise.all([
+      eventPlatform.events(eventId),
+      eventPlatform.nextTierIdByEvent(eventId),
+    ]);
+
+    const tierIds = Array.from({ length: Number(nextTierId) }, (_, index) => index + 1);
+    const tiers = await Promise.all(tierIds.map((tierId) => eventPlatform.ticketTiers(eventId, tierId)));
+
+    return {
+      eventId,
+      organizer: String(eventData.organizer),
+      eventState: Number(eventData.state),
+      walletCap: Number(eventData.walletCap),
+      tiers: tiers.map((tier, index) => ({
+        tierId: tierIds[index],
+        label: String(tier.label),
+        priceInCredits: tier.priceInCredits as bigint,
+        maxSupply: Number(tier.maxSupply),
+        soldCount: Number(tier.soldCount),
+      })),
+    };
+  } catch {
+    return {
+      eventId,
+      organizer: "0x0000000000000000000000000000000000000000",
+      eventState: 0,
+      walletCap: 0,
+      tiers: [] as Array<{
+        tierId: number;
+        label: string;
+        priceInCredits: bigint;
+        maxSupply: number;
+        soldCount: number;
+      }>,
+    };
+  }
+}
+
 export async function readCreditsAllowance(provider: BrowserProvider, owner: string) {
   const { creditsToken, eventPlatform } = getAppContracts(provider);
 
@@ -132,6 +174,36 @@ export async function readEventSnapshot(provider: BrowserProvider, eventId: numb
         soldCount: 0,
       })),
     };
+  }
+}
+
+export async function readAllEvents(provider: BrowserProvider) {
+  const { eventPlatform } = getAppContracts(provider);
+
+  try {
+    const nextEventId = Number(await eventPlatform.nextEventId());
+    const events = await Promise.all(
+      Array.from({ length: Math.max(nextEventId - 1, 0) }, async (_, index) => {
+        const eventId = index + 1;
+        const detail = await readEventDetail(provider, eventId);
+        const startingTier = detail.tiers
+          .filter((tier) => tier.priceInCredits > 0n)
+          .sort((left, right) => (left.priceInCredits < right.priceInCredits ? -1 : 1))[0];
+
+        return {
+          eventId,
+          organizer: detail.organizer,
+          eventState: detail.eventState,
+          walletCap: detail.walletCap,
+          startingPriceInCredits: startingTier?.priceInCredits ?? 0n,
+          tierCount: detail.tiers.length,
+        };
+      }),
+    );
+
+    return events.filter((eventItem) => eventItem.organizer !== "0x0000000000000000000000000000000000000000");
+  } catch {
+    return [];
   }
 }
 

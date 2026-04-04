@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { PageIntro } from "../components/PageIntro";
-import { demoEvents } from "../data/demoEvents";
+import { getEventContentByEventId } from "../data/demoEvents";
 import { readOwnedTickets } from "../lib/contracts";
 import type { AppRole } from "../types/app";
 
@@ -52,7 +52,7 @@ export function MyTicketsPage({ session }: MyTicketsPageProps) {
       const ownedTickets = await readOwnedTickets(session.provider, session.account);
 
       const mappedTickets = ownedTickets.map((ticket) => {
-        const eventEntry = Object.values(demoEvents).find((event) => ticket.eventId === 1) ?? Object.values(demoEvents)[0];
+        const eventEntry = getEventContentByEventId(ticket.eventId);
         const state = ticketStatePresentation(ticket.state);
 
         return {

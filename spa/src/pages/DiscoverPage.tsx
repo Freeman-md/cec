@@ -1,8 +1,8 @@
 import { formatUnits } from "ethers";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { demoEvents, type DemoEventSlug } from "../data/demoEvents";
-import { getDemoData, readEventSnapshot } from "../lib/contracts";
+import { getEventContentByEventId, getEventRouteKey } from "../data/demoEvents";
+import { readAllEvents } from "../lib/contracts";
 import type { AppRole } from "../types/app";
 
 type DiscoverPageProps = {
@@ -14,8 +14,6 @@ type DiscoverPageProps = {
     creditsBalance: string;
   };
 };
-
-const demoData = getDemoData();
 
 function formatCec(value: string) {
   const asNumber = Number(value);
@@ -46,28 +44,38 @@ function stateLabel(eventState: number) {
 }
 
 export function DiscoverPage({ session }: DiscoverPageProps) {
-  const featuredEventSlug = demoData.featuredEventSlug as DemoEventSlug;
-  const eventContent = demoEvents[featuredEventSlug];
-  const [eventPrice, setEventPrice] = useState("0");
-  const [eventSaleState, setEventSaleState] = useState("Draft");
+  const [events, setEvents] = useState<
+    Array<{
+      eventId: number;
+      eventState: number;
+      startingPrice: string;
+      routeKey: string;
+    }>
+  >([]);
 
   useEffect(() => {
-    async function hydrateFeaturedEvent() {
+    async function hydrateEvents() {
       if (!session.provider || !session.isCorrectNetwork) {
-        setEventPrice("0");
-        setEventSaleState("Offline");
+        setEvents([]);
         return;
       }
 
-      const snapshot = await readEventSnapshot(session.provider, demoData.featuredEventId, demoData.tierIds);
-      const lowestTier = snapshot.tiers.find((tier) => tier.priceInCredits > 0n);
-
-      setEventPrice(lowestTier ? formatUnits(lowestTier.priceInCredits, 18) : "0");
-      setEventSaleState(stateLabel(snapshot.eventState));
+      const eventRows = await readAllEvents(session.provider);
+      setEvents(
+        eventRows.map((eventItem) => ({
+          eventId: eventItem.eventId,
+          eventState: eventItem.eventState,
+          startingPrice: formatUnits(eventItem.startingPriceInCredits, 18),
+          routeKey: getEventRouteKey(eventItem.eventId),
+        })),
+      );
     }
 
-    void hydrateFeaturedEvent();
+    void hydrateEvents();
   }, [session.isCorrectNetwork, session.provider]);
+
+  const featuredEvent = events[0] ?? null;
+  const featuredEventContent = featuredEvent ? getEventContentByEventId(featuredEvent.eventId) : null;
 
   return (
     <div className="page-stack">
@@ -80,9 +88,11 @@ export function DiscoverPage({ session }: DiscoverPageProps) {
               Browse verified events, buy CEC with ETH, and access tickets through one connected wallet.
             </p>
             <div className="buttons mt-4">
-              <Link className="button is-primary" to={`/events/${demoData.featuredEventSlug}`}>
-                View Featured Event
-              </Link>
+              {featuredEvent ? (
+                <Link className="button is-primary" to={`/events/${featuredEvent.routeKey}`}>
+                  View Featured Event
+                </Link>
+              ) : null}
               <Link className="button is-light" to="/credits">
                 Buy CEC Credits
               </Link>
@@ -98,33 +108,74 @@ export function DiscoverPage({ session }: DiscoverPageProps) {
         </div>
       </section>
 
+      {featuredEvent && featuredEventContent ? (
+        <section className="surface-card">
+          <div className="section-heading">
+            <div>
+              <p className="eyebrow">Featured event</p>
+              <h2 className="title is-4">{featuredEventContent.title}</h2>
+            </div>
+            <span className="status-pill status-pill--info">{stateLabel(featuredEvent.eventState)}</span>
+          </div>
+
+          <div className="columns is-variable is-5">
+            <div className="column is-8">
+              <p className="meta-line">
+                {featuredEventContent.dateLabel} · {featuredEventContent.timeLabel}
+              </p>
+              <p className="meta-line">{featuredEventContent.venue}</p>
+              <p className="subtitle is-6 mt-3">{featuredEventContent.summary}</p>
+            </div>
+            <div className="column is-4">
+              <div className="simple-panel">
+                <p className="meta-line">Starting from</p>
+                <p className="title is-4">{formatCec(featuredEvent.startingPrice)} CEC</p>
+                <Link className="button is-link is-light is-fullwidth" to={`/events/${featuredEvent.routeKey}`}>
+                  Open Event
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+      ) : null}
+
       <section className="surface-card">
         <div className="section-heading">
           <div>
-            <p className="eyebrow">Featured event</p>
-            <h2 className="title is-4">{eventContent.title}</h2>
+            <p className="eyebrow">All events</p>
+            <h2 className="title is-4">Live event directory</h2>
           </div>
-          <span className="status-pill status-pill--info">{eventSaleState}</span>
         </div>
 
-        <div className="columns is-variable is-5">
-          <div className="column is-8">
-            <p className="meta-line">
-              {eventContent.dateLabel} · {eventContent.timeLabel}
-            </p>
-            <p className="meta-line">{eventContent.venue}</p>
-            <p className="subtitle is-6 mt-3">{eventContent.summary}</p>
+        {events.length === 0 ? (
+          <div className="simple-panel">
+            <h3 className="title is-5">No events available yet</h3>
+            <p className="meta-line">Approved organizers can create events in the Organizer Studio and they will appear here automatically.</p>
           </div>
-          <div className="column is-4">
-            <div className="simple-panel">
-              <p className="meta-line">Starting from</p>
-              <p className="title is-4">{formatCec(eventPrice)} CEC</p>
-              <Link className="button is-link is-light is-fullwidth" to={`/events/${demoData.featuredEventSlug}`}>
-                Open Event
-              </Link>
-            </div>
+        ) : (
+          <div className="card-grid card-grid--three">
+            {events.map((eventItem) => {
+              const content = getEventContentByEventId(eventItem.eventId);
+              return (
+                <article key={eventItem.eventId} className="simple-panel">
+                  <div className="section-heading">
+                    <p className="eyebrow">Event #{eventItem.eventId}</p>
+                    <span className="status-pill status-pill--info">{stateLabel(eventItem.eventState)}</span>
+                  </div>
+                  <h3 className="title is-5">{content.title}</h3>
+                  <p className="meta-line">{content.venue}</p>
+                  <p className="meta-line">
+                    {content.dateLabel} · {content.timeLabel}
+                  </p>
+                  <p className="meta-line">Starting from {formatCec(eventItem.startingPrice)} CEC</p>
+                  <Link className="button is-link is-light is-fullwidth mt-4" to={`/events/${eventItem.routeKey}`}>
+                    Open Event
+                  </Link>
+                </article>
+              );
+            })}
           </div>
-        </div>
+        )}
       </section>
     </div>
   );
