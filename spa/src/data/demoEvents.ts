@@ -10,6 +10,10 @@ export const demoEvents = {
     organizerSummary: "Student-led digital event collective focused on immersive campus nightlife experiences.",
     summary:
       "Campus Beats 2024 is the seeded local demo event for the CW2 SPA. It is used to prove credit purchase, ticket approval, and NFT ticket acquisition through one simple student flow.",
+    tierLabels: {
+      1: "General Admission",
+      2: "VIP Obsidian Pass",
+    },
     benefits: [
       "Verified on-chain ticket ownership",
       "Per-wallet cap enforcement",

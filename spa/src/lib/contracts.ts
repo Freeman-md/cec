@@ -144,3 +144,49 @@ export async function readWalletPurchases(provider: BrowserProvider, eventId: nu
     return 0;
   }
 }
+
+export async function readOwnedTickets(provider: BrowserProvider, account: string) {
+  const { ticketNFT } = getAppContracts(provider);
+
+  if (!ticketNFT) {
+    return [];
+  }
+
+  try {
+    const nextTicketId = Number(await ticketNFT.nextTicketId());
+    const ownedTickets: Array<{
+      ticketId: number;
+      eventId: number;
+      tierId: number;
+      state: number;
+    }> = [];
+
+    for (let ticketId = 1; ticketId < nextTicketId; ticketId += 1) {
+      try {
+        const owner = String(await ticketNFT.ownerOf(ticketId)).toLowerCase();
+        if (owner !== account.toLowerCase()) {
+          continue;
+        }
+
+        const [eventId, tierId, state] = await Promise.all([
+          ticketNFT.ticketEventIds(ticketId),
+          ticketNFT.ticketTierIds(ticketId),
+          ticketNFT.ticketStates(ticketId),
+        ]);
+
+        ownedTickets.push({
+          ticketId,
+          eventId: Number(eventId),
+          tierId: Number(tierId),
+          state: Number(state),
+        });
+      } catch {
+        continue;
+      }
+    }
+
+    return ownedTickets;
+  } catch {
+    return [];
+  }
+}
