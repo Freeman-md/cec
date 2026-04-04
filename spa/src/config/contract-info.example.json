@@ -1,0 +1,12 @@
+{
+  "networkName": "localhost",
+  "chainId": 31337,
+  "creditsToken": {
+    "address": "0x0000000000000000000000000000000000000000",
+    "abi": []
+  },
+  "eventPlatform": {
+    "address": "0x0000000000000000000000000000000000000000",
+    "abi": []
+  }
+}
