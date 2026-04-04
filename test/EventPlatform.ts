@@ -36,6 +36,16 @@ describe("EventPlatform", function () {
   }
 
   describe("administration", function () {
+    it("allows the owner to approve an organiser", async function () {
+      const { admin, organizer, eventPlatform } = await deployFixture();
+
+      await expect(eventPlatform.connect(admin).approveOrganizer(organizer.address, true))
+        .to.emit(eventPlatform, "OrganizerApprovalUpdated")
+        .withArgs(organizer.address, true);
+
+      expect(await eventPlatform.approvedOrganizers(organizer.address)).to.equal(true);
+    });
+
     it("allows only the owner to update the ETH-to-credit rate", async function () {
       const { admin, organizer, eventPlatform } = await deployFixture();
 
@@ -58,6 +68,71 @@ describe("EventPlatform", function () {
         eventPlatform,
         "InvalidRate",
       );
+    });
+  });
+
+  describe("organiser event configuration", function () {
+    it("lets an approved organiser create an event in draft state", async function () {
+      const { admin, organizer, eventPlatform } = await deployFixture();
+
+      await eventPlatform.connect(admin).approveOrganizer(organizer.address, true);
+
+      await expect(eventPlatform.connect(organizer).createEvent())
+        .to.emit(eventPlatform, "EventCreated")
+        .withArgs(1n, organizer.address);
+
+      const eventData = await eventPlatform.events(1n);
+
+      expect(eventData.eventId).to.equal(1n);
+      expect(eventData.organizer).to.equal(organizer.address);
+      expect(eventData.state).to.equal(0n);
+      expect(eventData.walletCap).to.equal(1n);
+    });
+
+    it("lets the event organiser create a ticket tier in draft state", async function () {
+      const { organizer, eventPlatform } = await createSaleFixture();
+      const creditsPrice = ethers.parseUnits("200", 18);
+
+      await expect(eventPlatform.connect(organizer).createTicketTier(1n, "Standard", creditsPrice, 2n))
+        .to.emit(eventPlatform, "TicketTierCreated")
+        .withArgs(1n, 1n, "Standard", creditsPrice, 2n);
+
+      const tier = await eventPlatform.ticketTiers(1n, 1n);
+
+      expect(tier.tierId).to.equal(1n);
+      expect(tier.eventId).to.equal(1n);
+      expect(tier.label).to.equal("Standard");
+      expect(tier.priceInCredits).to.equal(creditsPrice);
+      expect(tier.maxSupply).to.equal(2n);
+      expect(tier.soldCount).to.equal(0n);
+    });
+
+    it("lets the event organiser set a per-event wallet cap in draft state", async function () {
+      const { organizer, eventPlatform } = await createSaleFixture();
+
+      await expect(eventPlatform.connect(organizer).setPerEventWalletCap(1n, 3n))
+        .to.emit(eventPlatform, "WalletCapUpdated")
+        .withArgs(1n, 3n);
+
+      const eventData = await eventPlatform.events(1n);
+
+      expect(eventData.walletCap).to.equal(3n);
+    });
+
+    it("lets the event organiser start ticket sales after draft configuration", async function () {
+      const { organizer, eventPlatform } = await createSaleFixture();
+      const creditsPrice = ethers.parseUnits("200", 18);
+
+      await eventPlatform.connect(organizer).createTicketTier(1n, "Standard", creditsPrice, 2n);
+      await eventPlatform.connect(organizer).setPerEventWalletCap(1n, 2n);
+
+      await expect(eventPlatform.connect(organizer).startTicketSales(1n))
+        .to.emit(eventPlatform, "TicketSalesStarted")
+        .withArgs(1n);
+
+      const eventData = await eventPlatform.events(1n);
+
+      expect(eventData.state).to.equal(1n);
     });
   });
 
