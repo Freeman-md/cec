@@ -317,9 +317,9 @@ export function EventDetailPage({ session }: EventDetailPageProps) {
             </div>
           </div>
 
-          <div className="buttons mt-4">
+          <div className="event-detail-actions mt-4">
             <button
-              className="button is-primary"
+              className="button is-primary is-fullwidth"
               type="button"
               disabled={
                 status === "pending" ||
@@ -332,7 +332,7 @@ export function EventDetailPage({ session }: EventDetailPageProps) {
             >
               {status === "pending" ? "Processing..." : actionButtonLabel}
             </button>
-            <Link className="button is-light" to="/credits">
+            <Link className="button is-light is-fullwidth" to="/credits">
               Buy More Credits
             </Link>
           </div>
