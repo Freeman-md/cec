@@ -5,7 +5,7 @@ Hardhat project for the CW1/CW2 campus event credits and ticketing coursework.
 ## Current stage
 
 - base Hardhat scaffold initialized
-- sample `Counter` contract/module removed
+- sample `Counter` contract/module removed.
 - coursework scaffold contracts are in place for the CW1 feasibility build
 
 ## Current contract set
