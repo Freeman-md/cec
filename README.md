@@ -7,7 +7,7 @@
 - Domain: Blockchain / Smart Contracts / Web3 Frontend
 - Status: Active
 - Level: Intermediate–Advanced
-- Year: 2024
+- Year: 2026
 - Featured: false
 - Repository URL: Not public
 - Live URL: Not deployed
